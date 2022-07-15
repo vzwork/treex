@@ -1,0 +1,18 @@
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  background: #999;
+  font-size: 1.5rem;
+}
+
+.navbar a {
+  color: #000;
+  border-bottom: 2px #000 solid;
+  padding: 0.1rem;
+  margin: 0.2rem;
+}
+
+.navbar a:hover {
+  color: rgb(201, 188, 94);
+  border-bottom: 2px rgb(201, 188, 94) solid;
+}

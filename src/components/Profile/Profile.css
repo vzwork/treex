@@ -1,0 +1,9 @@
+.links {
+  display: felx;
+  flex-direction: column;
+}
+
+.messageCounter{
+  display: flex;
+  flex-direction: row;
+}

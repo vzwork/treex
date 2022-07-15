@@ -1,0 +1,33 @@
+.tree {
+  display:flex;
+  flex-direction: column;
+}
+
+.editTree{
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.editTreeUpsideDown{
+  display: flex;
+}
+
+.editTree button {
+  font-size: 1rem;
+  padding: .2rem;
+}
+
+.bottom {
+  position: absolute;
+  bottom: 0;
+}
+
+.navigation {
+  width: 100vw;
+  background: #888;
+}
+
+.inputNewNodeName {
+  width: 10rem;
+  font-size: 1.2rem;
+}

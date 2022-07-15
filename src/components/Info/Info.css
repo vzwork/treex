@@ -1,0 +1,13 @@
+.info {
+  width: 100vw;
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.explanation {
+  background: #ccc;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
