@@ -50,7 +50,10 @@ const Tree = () => {
                 }
               }/>
               <button onClick={clickedAddNode}>Add node</button>
-              <button onClick={async () => { 
+              <button onClick={async () => {
+                if (!user) {
+                  navigate('/profile/guest');
+                }
                 const parent = treeManager.getParent(baseNode);
                 await treeManager.deleteNode(baseNode); 
                 await treeManager.setBaseNode(parent);
