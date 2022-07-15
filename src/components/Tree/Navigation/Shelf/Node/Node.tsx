@@ -10,7 +10,7 @@ const Node = (props) => {
   const node = props.node;
   const baseNodeId = useSelector((state: any) => state.baseNodeId);
   const baseNodeName = useSelector((state: any) => state.baseNodeName);
-  const baseNode = {id:baseNodeId, name:baseNodeName};
+  let baseNode = {id:baseNodeId, name:baseNodeName};
   const dispatch = useDispatch();
   const [user, loading, error] = useAuthState(auth);
   async function select(){

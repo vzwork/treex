@@ -18,7 +18,7 @@ const Tree = () => {
   
   const baseNodeId = useSelector((state: any) => state.baseNodeId);
   const baseNodeName = useSelector((state: any) => state.baseNodeName);
-  const baseNode = {id:baseNodeId, name:baseNodeName};
+  let baseNode = {id:baseNodeId, name:baseNodeName};
 
   const [newNodeName, setNewNodeName] = useState('');
   const clickedAddNode = async() => {
