@@ -10,10 +10,9 @@ function Guest () {
     <div className='guest'>
       <div className='messageCounter'>
         <div className='message'>
-          Remaining requests: 
-        </div>
-        <div>
-          {100 - counter}
+          You are a guest! <br/>
+          Please sign in! <br/>
+          Remaining requests: {100 - counter}
         </div>
       </div>
       <div className='links'>

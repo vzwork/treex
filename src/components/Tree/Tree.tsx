@@ -5,6 +5,8 @@ import { TreeManager } from '../../data/TreeManager';
 import Navigation from './Navigation/Navigation';
 import { setBaseNode } from '../../store/actions';
 import { useNavigate } from 'react-router-dom';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../../data/firebaseAuth';
 
 const Tree = () => {
   const count = useSelector((state: any) => state.requestCount);
@@ -20,8 +22,14 @@ const Tree = () => {
   const baseNodeName = useSelector((state: any) => state.baseNodeName);
   let baseNode = {id:baseNodeId, name:baseNodeName};
 
+  const [user, loading, error] = useAuthState(auth);
+
   const [newNodeName, setNewNodeName] = useState('');
+  const navigate = useNavigate();
   const clickedAddNode = async() => {
+    if (!user) {
+      navigate('/profile/guest');
+    }
     if (baseNodeId != ''){
       if (newNodeName != ''){
         await treeManager.uploadNode(baseNode, newNodeName);
