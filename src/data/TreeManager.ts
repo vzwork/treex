@@ -42,6 +42,11 @@ export class TreeManager {
     return false;
   }
 
+  public async webHasTreeNode(node:INode) {
+    const docRef = doc(this.db, 'nodes', node.id);
+    return (await (getDoc(docRef))).exists();
+  }
+
   public hasTreeNode(node:INode) {
     return this.nodes.has(node.id);
   }

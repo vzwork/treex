@@ -18,7 +18,12 @@ import { TreeManager } from './data/TreeManager';
 
 const persistor = persistStore(store);
 
-// WUdK1a6fVuO5LjG1KouS
+const treeManager = TreeManager.getInstance();
+let baseNode = {id:store.getState().baseNodeId, name:store.getState().baseNodeName}
+let baseNodeExists = await treeManager.webHasTreeNode(baseNode);
+if (!baseNodeExists) {
+  baseNode = {id:'WUdK1a6fVuO5LjG1KouS', name:'root'}
+}
 
 class App extends Component {
 
@@ -29,14 +34,6 @@ class App extends Component {
       light: false
     }
     
-
-    // const baseNode = {id:'WUdK1a6fVuO5LjG1KouS', name:'root'}
-    let baseNode = {id:store.getState().baseNodeId, name:store.getState().baseNodeName}
-    if (!baseNode.id || baseNode.id === 'default') {
-      baseNode = {id:'WUdK1a6fVuO5LjG1KouS', name:'root'}
-    }
-    
-    const treeManager = TreeManager.getInstance();
     treeManager.setBaseNode(baseNode);
 
     this.changeTheme = this.changeTheme.bind(this);
