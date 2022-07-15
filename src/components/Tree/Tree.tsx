@@ -7,6 +7,15 @@ import { setBaseNode } from '../../store/actions';
 import { useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../../data/firebaseAuth';
+import store from '../../store';
+
+const treeManager = TreeManager.getInstance();
+let baseNode = {id:store.getState().baseNodeId, name:store.getState().baseNodeName}
+let baseNodeExists = await treeManager.webHasTreeNode(baseNode);
+if (!baseNodeExists) {
+  baseNode = {id:'WUdK1a6fVuO5LjG1KouS', name:'root'}
+}
+await treeManager.setBaseNode(baseNode);
 
 const Tree = () => {
   const count = useSelector((state: any) => state.requestCount);

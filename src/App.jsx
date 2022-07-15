@@ -14,16 +14,8 @@ import Login from './components/Profile/Login/Login';
 import Register from './components/Profile/Register/Register';
 import Reset from './components/Profile/Reset/Reset';
 import Guest from './components/Profile/Guest/Guest';
-import { TreeManager } from './data/TreeManager';
 
 const persistor = persistStore(store);
-
-const treeManager = TreeManager.getInstance();
-let baseNode = {id:store.getState().baseNodeId, name:store.getState().baseNodeName}
-let baseNodeExists = await treeManager.webHasTreeNode(baseNode);
-if (!baseNodeExists) {
-  baseNode = {id:'WUdK1a6fVuO5LjG1KouS', name:'root'}
-}
 
 class App extends Component {
 
@@ -33,8 +25,6 @@ class App extends Component {
     this.state = {
       light: false
     }
-    
-    treeManager.setBaseNode(baseNode);
 
     this.changeTheme = this.changeTheme.bind(this);
   }
