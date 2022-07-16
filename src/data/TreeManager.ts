@@ -42,6 +42,10 @@ export class TreeManager {
     return false;
   }
 
+  public hasTreeNode(node:Node) {
+    return this.nodes.has(node.id);
+  }
+
   public async downloadNode(base:INode) {
     const ref = doc(this.db, 'nodes', base.id).withConverter(treeNodeConverter);
     const docSnap = await getDoc(ref);
