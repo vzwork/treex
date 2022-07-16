@@ -7,36 +7,44 @@ import { setBaseNode } from '../../store/actions';
 import { useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../../data/firebaseAuth';
-import store from '../../store';
-
-const treeManager = TreeManager.getInstance();
-let baseNode = {id:store.getState().baseNodeId, name:store.getState().baseNodeName}
-let baseNodeExists = await treeManager.webHasTreeNode(baseNode);
-if (!baseNodeExists) {
-  baseNode = {id:'WUdK1a6fVuO5LjG1KouS', name:'root'}
-}
-await treeManager.setBaseNode(baseNode);
 
 const Tree = () => {
+  const baseNodeId = useSelector((state: any) => state.baseNodeId);
+  const baseNodeName = useSelector((state: any) => state.baseNodeName);
+  let baseNode = {id:baseNodeId, name:baseNodeName};
+  const treeManager = TreeManager.getInstance();
+  
+  // vvv tree set base node vvv
+  const [initialRender, setInitialRender] = useState(false);
+  useEffect(() => {
+    if (!initialRender) {
+      setTreeBaseNode();
+    }
+  })
+  const setTreeBaseNode = async() => {
+    const successful = await treeManager.setBaseNode(baseNode);
+    if (!successful) {
+      dispatch(setBaseNode({id:'WUdK1a6fVuO5LjG1KouS', name:'root'}));
+    }
+    console.log()
+    setInitialRender(true);
+  }
+  // vvv tree set base node vvv
+  
+  // vvv guest request limit vvv
   const count = useSelector((state: any) => state.requestCount);
   if (count >= 100) {
     const navigate = useNavigate();
     navigate('/profile/guest');
   }
+  // ^^^ guest request limit ^^^
 
-  const treeManager = TreeManager.getInstance();
-  const dispatch = useDispatch();
-  
-  const baseNodeId = useSelector((state: any) => state.baseNodeId);
-  const baseNodeName = useSelector((state: any) => state.baseNodeName);
-  let baseNode = {id:baseNodeId, name:baseNodeName};
-
+  // vvv edit tree as a guest vvv
   const [user, loading, error] = useAuthState(auth);
-
   const [newNodeName, setNewNodeName] = useState('');
-  const navigate = useNavigate();
   const clickedAddNode = async() => {
     if (!user) {
+      const navigate = useNavigate();
       navigate('/profile/guest');
     }
     if (baseNodeId != ''){
@@ -46,7 +54,10 @@ const Tree = () => {
       }
     }
   }
+  // ^^^ edit tree as a guest ^^^
 
+  const dispatch = useDispatch();
+  
   return (
     <div className='tree'>
       <div className='bottom'>
@@ -61,6 +72,7 @@ const Tree = () => {
               <button onClick={clickedAddNode}>Add node</button>
               <button onClick={async () => {
                 if (!user) {
+                  const navigate = useNavigate();
                   navigate('/profile/guest');
                 }
                 const parent = treeManager.getParent(baseNode);

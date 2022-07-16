@@ -35,63 +35,119 @@ export class TreeManager {
   }
   // ^^^ Singleton ^^^
 
-  private isRootNode(id:string, node:TreeNode):boolean {
-    if (id == node.parent.id){
+  private isRootNode(node:Node, treeNode:TreeNode):boolean {
+    if (node.id == treeNode.parent.id){
       return true;
     }
     return false;
   }
 
-  public async webHasTreeNode(node:INode) {
-    const docRef = doc(this.db, 'nodes', node.id);
-    return (await (getDoc(docRef))).exists();
-  }
-
-  public hasTreeNode(node:INode) {
-    return this.nodes.has(node.id);
+  public async downloadNode(base:INode) {
+    const ref = doc(this.db, 'nodes', base.id).withConverter(treeNodeConverter);
+    const docSnap = await getDoc(ref);
+    if (!docSnap.exists()) {
+      console.log('TreeManager.downloadNode(): docSnap not exists');
+      return false;
+    } else {
+      const treeNode = docSnap.data();
+      if (!treeNode) {
+        console.log('TreeManager.downloadNode(): treeNode is null');
+        return false;
+      } else {
+        const newTreeNode = {
+          parent: treeNode.parent,
+          children: treeNode.children
+        }
+        this.nodes.set(base.id, newTreeNode);
+        return true;
+      }
+    }
   }
 
   public async setBaseNode(node:INode) {
-    const nodeExistsLocaly = this.nodes.has(node.id);
-    if (!nodeExistsLocaly) {
-      await this.downloadNode(node);
+    const nodeExistsLocally = this.nodes.has(node.id);
+    if (!nodeExistsLocally) {
+      const existsOnWeb = await this.downloadNode(node);
+      if (!existsOnWeb) {
+        console.log('TreeManager.setBaseNode(): node has no web data!');
+        return false;
+      }
     }
     // populate top shelf
     const treeNode = this.nodes.get(node.id);
-    if (!!treeNode) {
+    if (!treeNode) {
+      console.log('TreeManager.setBaseNode(): after download node doesn\'t exist locally. Unexpected!');
+      return false;
+    } else {
       const topShelf = treeNode.children;
-      if (!!topShelf) { this.topShelf = topShelf; }
-
-      // check if treeNode is rootNode, if so, build mid shelf only from root node
-      if (this.isRootNode(node.id, treeNode)) {
-        this.midShelf = [node];
-        this.botShelf = [];
+      if (!topShelf) {
+        console.log('TreeManager.setBaseNode(): topShelf is null. Unexpected!');
+        return false;
       } else {
+        this.topShelf = topShelf;
+
         // populate mid shelf
+        if (this.isRootNode(node, treeNode)){
+          this.midShelf = [node];
+          this.botShelf = [];
+          return true;
+        }
         const parentNode = treeNode.parent;
-        if (!!parentNode) {
-          if (!this.nodes.has(parentNode.id)){
-            await this.downloadNode(parentNode);
+        if (!parentNode) {
+          console.log('TreeManager.setBaseNode(): parentNode is null. Unexpected!');
+          return false;
+        } else {
+          const parentNodeExistsLocally = this.nodes.has(parentNode.id);
+          if (!parentNodeExistsLocally) {
+            const parentExistsOnWeb = await this.downloadNode(parentNode);
+            if (!parentExistsOnWeb) {
+              console.log('TreeManager.setBaseNode(): parentNode has no web data!');
+              return false;
+            }
           }
           const parentTreeNode = this.nodes.get(parentNode.id);
-          if (!!parentTreeNode) {
+          if (!parentTreeNode) {
+            console.log('TreeManager.setBaseNode(): parentTreeNode is null. Unexpected!');
+            return false;
+          } else {
             const midShelf = parentTreeNode.children;
-            if (!!midShelf) { this.midShelf = midShelf; }
-            // check if parentTreeNode is rootNode, if so, build bot shelf only from root node
-            if (this.isRootNode(parentNode.id, parentTreeNode)){
-              this.botShelf = [parentNode];
+            if (!midShelf) {
+              console.log('TreeManager.setBaseNode(): midShelf is null. Unexpected!');
+              return false;
             } else {
+              this.midShelf = midShelf;
 
               // populate bot shelf
+              if (this.isRootNode(parentNode, parentTreeNode)) {
+                this.botShelf = [parentNode];
+                return true;
+              }
               const parentParentNode = parentTreeNode.parent;
-              if (!!parentParentNode) {
-                if (!this.nodes.has(parentParentNode.id)) {
-                  await this.downloadNode(parentParentNode);
+              if (!parentParentNode) {
+                console.log('TreeManager.setBaseNode(): parentParentNode is null. Unexpected!');
+                return false;
+              } else {
+                const parentParentNodeExistsLocally = this.nodes.has(parentParentNode.id);
+                if (!parentParentNodeExistsLocally){
+                  const parentParentExistsOnWeb = await this.downloadNode(parentParentNode);
+                  if (!parentParentExistsOnWeb) {
+                    console.log('TreeManager.setBaseNode(): parentParentNode has no web data!');
+                    return false;
+                  }
                 }
                 const parentParentTreeNode = this.nodes.get(parentParentNode.id);
-                if (!!parentParentTreeNode) {
+                if (!parentParentTreeNode) {
+                  console.log('TreeManager.setBaseNode: parentParentTreeNode is null. Unexpected!');
+                  return false;
+                } else {
                   const botShelf = parentParentTreeNode.children;
-                  if (!! botShelf) { this.botShelf = botShelf; }
+                  if (!botShelf) {
+                    console.log('TreeManager.setBaseNode(): botShelf is null. Unexpected!');
+                    return false;
+                  } else {
+                    this.botShelf = botShelf;
+                    return true;
+                  }
                 }
               }
             }
@@ -138,32 +194,14 @@ export class TreeManager {
     }
   }
 
-  public async downloadNode(base:INode) {
-    const ref = doc(this.db, 'nodes', base.id).withConverter(treeNodeConverter);
-    const docSnap = await getDoc(ref);
-    if (docSnap.exists()) {
-      const treeNode = docSnap.data();
-      if (!!treeNode) {
-        const newTreeNode = {
-          parent: treeNode.parent,
-          children: treeNode.children
-        }
-        this.nodes.set(base.id, newTreeNode);
-      } else {
-        console.log('Error while looking for base TreeNode!');
-      }
-    } else {
-      console.log('No such document!');
-    }
-  }
-
   public getParent(node:INode):INode {
     const treeNode = this.nodes.get(node.id);
-    if (!!treeNode) {
+    if (!treeNode) {
+      console.log('TreeManager.getParent(): treeNode is null.');
+      return node;
+    } else {
       return treeNode.parent;
     }
-    console.log('Unexpected behavior');
-    return {id:'error', name:'error'};
   }
 
   public async deleteNode(node:INode) {
