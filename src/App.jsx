@@ -1,6 +1,6 @@
 import './App.css';
 import React, { Component } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from "./store";
 import { persistStore } from 'redux-persist';
@@ -39,7 +39,9 @@ class App extends Component {
         <PersistGate loading={null} persistor={persistor}>
           <div id='App'>
             <div className={(this.state.light ? 'theme--light' : 'theme--default')}>
-              <BrowserRouter>
+              <HashRouter
+                basename='/'
+              >
                 <Navbar />
                 <Routes>
                   <Route path='/' element={<Info />} />
@@ -52,7 +54,7 @@ class App extends Component {
                     <Route path='reset' element={<Reset />} />
                   </Route>
                 </Routes>
-              </BrowserRouter>
+              </HashRouter>
             </div>
           </div>
         </PersistGate>
