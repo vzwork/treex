@@ -24,6 +24,7 @@ const Tree = () => {
   const setTreeBaseNode = async() => {
     const successful = await treeManager.setBaseNode(baseNode);
     if (!successful) {
+      console.log('initial state | deleted node');
       dispatch(setBaseNode({id:'WUdK1a6fVuO5LjG1KouS', name:'root'}));
     }
     console.log()
