@@ -7,6 +7,7 @@ import { setBaseNode } from '../../store/actions';
 import { useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../../data/firebaseAuth';
+import Comments from './Comments/Comments';
 
 const Tree = () => {
   const baseNodeId = useSelector((state: any) => state.baseNodeId);
@@ -40,12 +41,12 @@ const Tree = () => {
   }
   // ^^^ guest request limit ^^^
 
-  // vvv edit tree as a guest vvv
+  // vvv edit tree vvv
   const [user, loading, error] = useAuthState(auth);
   const [newNodeName, setNewNodeName] = useState('');
+  const navigate = useNavigate();
   const clickedAddNode = async() => {
     if (!user) {
-      const navigate = useNavigate();
       navigate('/profile/guest');
     }
     if (baseNodeId != ''){
@@ -55,12 +56,13 @@ const Tree = () => {
       }
     }
   }
-  // ^^^ edit tree as a guest ^^^
+  // ^^^ edit tree ^^^
 
   const dispatch = useDispatch();
   
   return (
     <div className='tree'>
+      <Comments nodeId={baseNodeId}/>
       <div className='bottom'>
         <div className='editTree'>
           <div className='editTreeUpsideDown'>
@@ -73,7 +75,6 @@ const Tree = () => {
               <button onClick={clickedAddNode}>Add node</button>
               <button onClick={async () => {
                 if (!user) {
-                  const navigate = useNavigate();
                   navigate('/profile/guest');
                 }
                 const parent = treeManager.getParent(baseNode);

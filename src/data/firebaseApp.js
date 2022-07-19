@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+const { initializeAppCheck, ReCaptchaEnterpriseProvider } = require("firebase/app-check");
 
 // vvv app setup vvv
 const firebaseConfig = {
@@ -12,6 +13,10 @@ const firebaseConfig = {
   measurementId: "G-2BMT70LMDD"
 };
 const app = initializeApp(firebaseConfig);
+const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaEnterpriseProvider('6LevVAAhAAAAAJty0Y5aNBys04Ync7domHmuZkcv'),
+  isTokenAutoRefreshEnabled: true
+})
 // ^^^ app setup ^^^
 
 export default app;
