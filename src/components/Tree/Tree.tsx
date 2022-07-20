@@ -48,11 +48,12 @@ const Tree = () => {
   const clickedAddNode = async() => {
     if (!user) {
       navigate('/profile/guest');
-    }
-    if (baseNodeId != ''){
-      if (newNodeName != ''){
-        await treeManager.uploadNode(baseNode, newNodeName);
-        setNewNodeName('');
+    } else {
+      if (baseNodeId != ''){
+        if (newNodeName != ''){
+          await treeManager.uploadNode(baseNode, newNodeName);
+          setNewNodeName('');
+        }
       }
     }
   }
@@ -76,11 +77,12 @@ const Tree = () => {
               <button onClick={async () => {
                 if (!user) {
                   navigate('/profile/guest');
+                } else {
+                  const parent = treeManager.getParent(baseNode);
+                  await treeManager.deleteNode(baseNode); 
+                  await treeManager.setBaseNode(parent);
+                  dispatch(setBaseNode(parent));
                 }
-                const parent = treeManager.getParent(baseNode);
-                await treeManager.deleteNode(baseNode); 
-                await treeManager.setBaseNode(parent);
-                dispatch(setBaseNode(parent));
               }}>Delete node</button>
           </div>
           </div>
