@@ -13,7 +13,7 @@ const CommentEntry = (props) => {
 
   return (
     <div className='commentEntry'>
-      <input className='commentEntryInput' type='text' value={commentEntry} onChange={
+      <input className='btn commentEntryInput' type='text' value={commentEntry} onChange={
         (event) => {
           setCommentEntry(event.target.value);
         }
@@ -30,7 +30,7 @@ const CommentEntry = (props) => {
             setCommentEntry('');
           }
         }
-      }}>send</button>
+      }} className='btn'>send</button>
     </div>
   );
 }

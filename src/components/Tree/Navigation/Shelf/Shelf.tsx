@@ -6,7 +6,7 @@ const Shelf = (props) => {
   const nodes = props.nodes;
   return (
     <div className='shelf'>
-      <p className='node'>|</p>
+      <p className='btn node'>|</p>
       {nodes.map((item, index)=>{
           return <Node node={item} key={index} />
       })}

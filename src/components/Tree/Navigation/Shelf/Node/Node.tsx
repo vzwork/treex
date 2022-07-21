@@ -24,7 +24,7 @@ const Node = (props) => {
     dispatch(setBaseNode(node));
   }
   return (
-    <button onClick={select} className={'node ' + (baseNode.id == node.id ? 'base' : '')}>
+    <button onClick={select} className={'btn node ' + (baseNode.id == node.id ? 'base' : '')}>
       {node.name}
     </button>
   );

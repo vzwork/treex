@@ -4,30 +4,37 @@
 }
 
 .editTree{
+  position: absolute;
+  bottom: 0;
+  width: calc(100% - 16px);
+  padding: 0.5rem;
+  padding-top: 1rem;
+  border-radius: 0.5rem;
+  background: #ccc;
   display: flex;
   flex-direction: row-reverse;
 }
 
-.editTreeUpsideDown{
-  display: flex;
-}
-
-.editTree button {
-  font-size: 1rem;
-  padding: .2rem;
-}
-
-.bottom {
-  position: absolute;
-  bottom: 0;
-}
-
 .navigation {
-  width: 100vw;
-  background: #888;
+  width: calc(100% - 100px);
+}
+
+.editTreeButtons {
+  width: 100px;
+  margin: 0.2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.ebtn {
+  font-size: 1.2rem;
 }
 
 .inputNewNodeName {
-  width: 10rem;
-  font-size: 1.2rem;
+  background: white;
+  color: #000;
+  border: 1px #000 solid;
+  border-radius: 0.5rem;
+  padding: 0.3rem;
+  margin: 0.2rem;
 }

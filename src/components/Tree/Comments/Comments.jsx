@@ -2,6 +2,7 @@ import './Comments.css';
 import React, { useState } from 'react';
 import CommentEntry from './CommentEntry/CommentEntry';
 import { CommentsManager } from '../../../data/CommentsManager';
+import Comment from './Comment/Comment';
 
 const Comments = (props) => {
   const [comments, setComments] = useState({});
@@ -19,7 +20,7 @@ const Comments = (props) => {
       <div className='commentsHistory'>
         {Object.keys(comments).map((key) => {
           return (
-            <div key={key}>{comments[key].text}</div>
+            <Comment key={key} date={comments[key].date} uName={comments[key].uName} text={comments[key].text} />
           );
         })}
       </div>

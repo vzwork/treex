@@ -26,7 +26,6 @@ export class CommentsManager {
     const nodeCommentsRef = ref(this.db, 'nodes/' + nodeId);
     onValue(nodeCommentsRef, (snapshot) => {
       if (!snapshot.exists()) {
-        console.log('First person to comment!');
         let date = new Date();
         set(nodeCommentsRef, {
             comments: [
@@ -55,7 +54,6 @@ export class CommentsManager {
     }
     push(nodeCommentsRef, comment)
     .then(() => {
-      console.log('success');
     })
     .catch((err) => {
       console.log(err);

@@ -1,18 +1,22 @@
 .navbar {
+  position: absolute;
+  z-index: 1;
+  width: 100vw;
   display: flex;
-  justify-content: space-around;
-  background: #999;
-  font-size: 1.5rem;
+  justify-content: space-between;
+  font-size: 1.3rem;
 }
 
 .navbar a {
+  background: white;
   color: #000;
-  border-bottom: 2px #000 solid;
-  padding: 0.1rem;
+  border: 1px #000 solid;
+  border-radius: 0.5rem;
+  padding: 0.3rem;
   margin: 0.2rem;
 }
 
 .navbar a:hover {
-  color: rgb(201, 188, 94);
-  border-bottom: 2px rgb(201, 188, 94) solid;
+  color: green;
+  border: 1px green solid;
 }

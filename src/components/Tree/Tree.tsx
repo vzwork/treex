@@ -64,16 +64,14 @@ const Tree = () => {
   return (
     <div className='tree'>
       <Comments nodeId={baseNodeId}/>
-      <div className='bottom'>
         <div className='editTree'>
-          <div className='editTreeUpsideDown'>
             <div className='editTreeButtons'>
-              <input className='inputNewNodeName' type='text' value={newNodeName} onChange={
+              <input className='inputNewNodeName ebtn' type='text' value={newNodeName} onChange={
                 (event) => {
                   setNewNodeName(event.target.value);
                 }
               }/>
-              <button onClick={clickedAddNode}>Add node</button>
+              <button onClick={clickedAddNode} className='btn ebtn'>add</button>
               <button onClick={async () => {
                 if (!user) {
                   navigate('/profile/guest');
@@ -83,12 +81,10 @@ const Tree = () => {
                   await treeManager.setBaseNode(parent);
                   dispatch(setBaseNode(parent));
                 }
-              }}>Delete node</button>
+              }} className='btn ebtn'>delete</button>
           </div>
-          </div>
+          <Navigation />
         </div>
-        <Navigation />
-      </div>
     </div>
   );
 }

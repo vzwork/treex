@@ -2,7 +2,8 @@
 
 html,
 body {
-  font-family: "Comfortaa"; }
+  font-family: "Comfortaa"; 
+}
 
 * {
   margin: 0;
@@ -11,4 +12,18 @@ body {
 
 a {
   text-decoration: none;
+}
+
+.btn {
+  background: white;
+  color: #000;
+  border: 1px #000 solid;
+  border-radius: 0.5rem;
+  padding: 0.3rem;
+  margin: 0.2rem;
+}
+
+.btn:hover {
+  color: green;
+  border-color: green;
 }

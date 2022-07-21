@@ -1,12 +1,7 @@
 .node {
   font-size: 1.2rem;
-  background: #ccc;
-  padding: 0.2rem;
-  margin: 0.2rem;
-  border: 1px solid white;
-  border-radius: 5px;
 }
 
 .base {
-  background: rgb(201, 188, 94);
+  background: rgb(138, 186, 142);
 }

@@ -8,9 +8,9 @@ function Navbar () {
 
   return (
     <div className='navbar'>
-        <Link to='/' >Guide</Link>
-        <Link to='/profile/dashboard' >Profile</Link>
-        <Link to='/tree' >Tree</Link>
+        <Link to='/profile/dashboard' >profile</Link>
+        <Link to='/' >guide</Link>
+        <Link to='/tree' >tree</Link>
     </div>
   );
 };
