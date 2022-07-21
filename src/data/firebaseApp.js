@@ -13,7 +13,7 @@ const firebaseConfig = {
   measurementId: "G-2BMT70LMDD"
 };
 const app = initializeApp(firebaseConfig);
-self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+//self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 const appCheck = initializeAppCheck(app, {
   provider: new ReCaptchaEnterpriseProvider('6LeX4AAhAAAAAEEsPhPOZ5p39Vbk7GBhTDYGFxoW'),
   isTokenAutoRefreshEnabled: true
