@@ -26,7 +26,7 @@ const CommentEntry = (props) => {
           if (commentEntry == '') {
             console.log('empty comment!');
           } else {
-            commentsManager.addComment(props.nodeId, user.uid, 'deez', commentEntry);
+            commentsManager.addComment(props.nodeId, user.uid, 'test', commentEntry);
             setCommentEntry('');
           }
         }

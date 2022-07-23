@@ -18,7 +18,7 @@ const Comments = (props) => {
     <div className='comments'>
       <CommentEntry nodeId={props.nodeId}/>
       <div className='commentsHistory'>
-        {Object.keys(comments).map((key) => {
+        {Object.keys(comments).reverse().map((key) => {
           return (
             <Comment key={key} date={comments[key].date} uName={comments[key].uName} text={comments[key].text} />
           );

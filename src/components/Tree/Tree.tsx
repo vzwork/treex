@@ -66,7 +66,7 @@ const Tree = () => {
       <Comments nodeId={baseNodeId}/>
         <div className='editTree'>
             <div className='editTreeButtons'>
-              <input className='inputNewNodeName ebtn' type='text' value={newNodeName} onChange={
+              <input className='inputNewNodeName ebtn' placeholder='name' type='text' value={newNodeName} onChange={
                 (event) => {
                   setNewNodeName(event.target.value);
                 }
