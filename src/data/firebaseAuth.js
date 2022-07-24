@@ -42,28 +42,35 @@ const signInWithGoogle = async () => {
 };
 
 const logInWithEmailAndPassword = async (email, password) => {
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (err) {
-    console.error(err);
-    alert(err.message);
-  }
+  signInWithEmailAndPassword(auth, email, password)
+    .catch((errSignIn) => {
+      console.log('error');
+      console.log('errSignIn', errSignIn.message);
+      alert(errSignIn.message);
+    }).then((userCredential) => {
+      console.log('successfully signed in');
+    })
 };
 
 const registerWithEmailAndPassword = async (name, email, password) => {
-  try {
-    const res = await createUserWithEmailAndPassword(auth, email, password);
-    const user = res.user;
-    await addDoc(collection(db, "users"), {
-      uid: user.uid,
-      name,
-      authProvider: "local",
-      email,
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      addDoc(collection(db, 'users'), {
+        uid: user.uid,
+        name,
+        authProvider: 'local',
+        email,
+      }).then((res) => {
+        // console.log('successfully added new user');
+      }).catch((errAddDoc) => {
+        console.log('errAddDoc', errAddDoc);
+        alert(errAddDoc.message);
+      })
+    }).catch((errCreateUser) => {
+      console.log('errCreateUser', errCreateUser);
+      alert(errCreateUser.message);
     });
-  } catch (err) {
-    console.error(err);
-    alert(err.message);
-  }
 };
 
 const sendPasswordReset = async (email) => {
