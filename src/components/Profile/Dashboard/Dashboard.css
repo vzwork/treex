@@ -1,24 +1,33 @@
 .dashboard {
-  height: 70vh;
+  background: white;
+  position: relative;
+  padding: 0.5rem;
+}
+
+.name {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  background: green;
+  font-size: 1.6rem;
 }
-.dashboard__container {
+
+.userName {
+  background: red;
+}
+
+.userStatus {
   display: flex;
-  flex-direction: column;
-  text-align: center;
-  background-color: #dcdcdc;
-  padding: 30px;
+  justify-content: end;
 }
-.dashboard__btn {
-  padding: 10px;
-  font-size: 18px;
-  margin-top: 10px;
-  border: none;
-  color: white;
-  background-color: black;
+
+.userStatusButtons {
+  display: flex;
 }
-.dashboard div {
-  margin-top: 7px;
+
+.userStatusButton {
+  background: #aaa;
+  width: max-content;
+  margin: 0.1rem;
+  padding: 0.3rem;
+  border-radius: 5px;
 }

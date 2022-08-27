@@ -1,5 +1,14 @@
 .node {
-  font-size: 1.2rem;
+  font-family: "Comfortaa";
+  font-size: 1.3rem;
+  margin: 3px;
+  padding: 0px 10px;
+  border-radius: 10px;
+  border: 1px solid white;
+}
+
+.node:hover {
+  border: 1px solid black;
 }
 
 .base {

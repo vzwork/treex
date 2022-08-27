@@ -1,249 +1,288 @@
-import app from './firebaseApp';
-import { ITreeNode } from './TreeNode';
-import { INode, Node } from './Node';
-import { FirebaseApp, initializeApp } from 'firebase/app';
-import { getFirestore, doc, getDoc, collection, setDoc, addDoc, deleteDoc } from 'firebase/firestore';
-import { TreeNode, treeNodeConverter } from './TreeNode';
+import app from './firebaseApp'
+import { INode, Node, nodeConverter, NodeReference } from './Node'
+import { getFirestore, doc, onSnapshot, collection, setDoc, deleteDoc, Firestore, Unsubscribe } from 'firebase/firestore'
+import { useDispatch } from 'react-redux'
+import { setShelves, setBaseNode } from '../store/actions'
+import store from '../store'
+import { map } from '@firebase/util'
 
 export class TreeManager {
   // vvv fields vvv
-  app:FirebaseApp;
-  db; 
-  nodes:Map<string, ITreeNode>;
-  topShelf:INode[];
-  midShelf:INode[];
-  botShelf:INode[];
+  numberOfNodesToWatch = 10
+  defaultNodeId = 'KSLC3E9YXXNJNKx23LqV'
+  db:Firestore
+  nodes:Map<string, Node>
+  names:Map<string, string>
+  recentNodes:string[]
+  updates:Map<string, Unsubscribe>
   // ^^^ fields ^^^
 
   // vvv Singleton vvv
-  private static instance: TreeManager;
-
+  private static instance: TreeManager
   public static getInstance(): TreeManager {
     if (!TreeManager.instance) {
-      TreeManager.instance = new TreeManager();
+      TreeManager.instance = new TreeManager()
     }
     return TreeManager.instance;
   }
-
   private constructor() {
-    this.app = app;
     this.db = getFirestore(app);
-    this.nodes = new Map<string, ITreeNode>;
-    this.topShelf = [];
-    this.midShelf = [];
-    this.botShelf = [];
+    this.nodes = new Map<string, Node>();
+    this.names = new Map<string, string>();
+    this.recentNodes = []; // [recent -> leastRecent]
+    this.updates = new Map<string, Unsubscribe>();
   }
   // ^^^ Singleton ^^^
 
-  private isRootNode(node:Node, treeNode:TreeNode):boolean {
-    if (node.id == treeNode.parent.id){
-      return true;
-    }
-    return false;
+  public getName(id:string) {
+    if (this.names.has(id)) { return this.names.get(id); }
+    return '-----'; 
   }
 
-  public hasTreeNode(node:Node) {
-    return this.nodes.has(node.id);
+  // redux taxes serializable forms of data, not NodeReference, we convert to array of ids
+  private getIdFromReference(references:NodeReference[]) {
+    const out:string[] = []
+    references.forEach((reference) => {
+      out.push(reference.id)
+      this.names.set(reference.id, reference.name)
+    })
+    return out
   }
 
-  public async downloadNode(base:INode) {
-    const ref = doc(this.db, 'nodes', base.id).withConverter(treeNodeConverter);
-    const docSnap = await getDoc(ref);
-    if (!docSnap.exists()) {
-      console.log('TreeManager.downloadNode(): docSnap not exists');
-      return false;
-    } else {
-      const treeNode = docSnap.data();
-      if (!treeNode) {
-        console.log('TreeManager.downloadNode(): treeNode is null');
-        return false;
-      } else {
-        const newTreeNode = {
-          parent: treeNode.parent,
-          children: treeNode.children
-        }
-        this.nodes.set(base.id, newTreeNode);
-        return true;
-      }
-    }
-  }
+  public setBase(id:string) {
+    // update history
+    this.recentNodes.unshift(id)
 
-  public async setBaseNode(node:INode) {
-    const nodeExistsLocally = this.nodes.has(node.id);
+    // make sure we have node data
+    const nodeExistsLocally = this.nodes.has(id)
     if (!nodeExistsLocally) {
-      const existsOnWeb = await this.downloadNode(node);
-      if (!existsOnWeb) {
-        console.log('TreeManager.setBaseNode(): node has no web data!');
-        return false;
-      }
+      // we leave the process to the download node
+      // that is because we want updates to regenerate the tree
+      // meaning on each update -downloadNode()- the tree will call -setBase()-
+      this.downloadNode(id)
+      return
     }
-    // populate top shelf
-    const treeNode = this.nodes.get(node.id);
-    if (!treeNode) {
-      console.log('TreeManager.setBaseNode(): after download node doesn\'t exist locally. Unexpected!');
-      return false;
-    } else {
-      const topShelf = treeNode.children;
-      if (!topShelf) {
-        console.log('TreeManager.setBaseNode(): topShelf is null. Unexpected!');
-        return false;
-      } else {
-        this.topShelf = topShelf;
 
-        // populate mid shelf
-        if (this.isRootNode(node, treeNode)){
-          this.midShelf = [node];
-          this.botShelf = [];
-          return true;
-        }
-        const parentNode = treeNode.parent;
+    const shelves:string[][] = []
+    // build top shelf
+    const base = this.nodes.get(id)
+    if (!base) {
+      console.log(`TreeManager.setBaseNode(): map has no data for id ${id}, unexpected!!!`)
+      return
+    }
+    shelves.push(this.getIdFromReference(base.childrenReferences))
+    // build mid shelf
+    if (this.isRootNode(base)) {
+      shelves.push([base.selfReference.id])
+      this.names.set(base.selfReference.id, base.selfReference.name)
+    } else {
+      let parentNodeReferecne = base.parentReferences[0]
+      let parentNodeId = parentNodeReferecne.id
+      let parentNodeExistsLocally = this.nodes.has(parentNodeId)
+      if (!parentNodeExistsLocally) {
+        this.downloadNode(parentNodeId)
+        return
+      }
+      let parentNode = this.nodes.get(parentNodeId)
+      if (!parentNode) {
+        console.log(`TreeManager.setBaseNode(): map has no data for id ${parentNodeId}, unexpected!!!`)
+        return
+      }
+
+      // build the rest of bottom shelves
+      // stop at root node or if reference is not downloaded
+      while (parentNodeExistsLocally) {
+        parentNode = this.nodes.get(parentNodeId)
         if (!parentNode) {
-          console.log('TreeManager.setBaseNode(): parentNode is null. Unexpected!');
-          return false;
+          console.log(`TreeManager.setBaseNode(): map has no data for id ${parentNodeId}, unexpected!!!`)
+          return
+        }
+        if (this.isRootNode(parentNode)) {
+          shelves.push(this.getIdFromReference(parentNode.childrenReferences))
+          shelves.push([parentNode.selfReference.id])
+          this.names.set(parentNode.selfReference.id, parentNode.selfReference.name)
+          break
         } else {
-          const parentNodeExistsLocally = this.nodes.has(parentNode.id);
-          if (!parentNodeExistsLocally) {
-            const parentExistsOnWeb = await this.downloadNode(parentNode);
-            if (!parentExistsOnWeb) {
-              console.log('TreeManager.setBaseNode(): parentNode has no web data!');
-              return false;
-            }
-          }
-          const parentTreeNode = this.nodes.get(parentNode.id);
-          if (!parentTreeNode) {
-            console.log('TreeManager.setBaseNode(): parentTreeNode is null. Unexpected!');
-            return false;
-          } else {
-            const midShelf = parentTreeNode.children;
-            if (!midShelf) {
-              console.log('TreeManager.setBaseNode(): midShelf is null. Unexpected!');
-              return false;
-            } else {
-              this.midShelf = midShelf;
-
-              // populate bot shelf
-              if (this.isRootNode(parentNode, parentTreeNode)) {
-                this.botShelf = [parentNode];
-                return true;
-              }
-              const parentParentNode = parentTreeNode.parent;
-              if (!parentParentNode) {
-                console.log('TreeManager.setBaseNode(): parentParentNode is null. Unexpected!');
-                return false;
-              } else {
-                const parentParentNodeExistsLocally = this.nodes.has(parentParentNode.id);
-                if (!parentParentNodeExistsLocally){
-                  const parentParentExistsOnWeb = await this.downloadNode(parentParentNode);
-                  if (!parentParentExistsOnWeb) {
-                    console.log('TreeManager.setBaseNode(): parentParentNode has no web data!');
-                    return false;
-                  }
-                }
-                const parentParentTreeNode = this.nodes.get(parentParentNode.id);
-                if (!parentParentTreeNode) {
-                  console.log('TreeManager.setBaseNode: parentParentTreeNode is null. Unexpected!');
-                  return false;
-                } else {
-                  const botShelf = parentParentTreeNode.children;
-                  if (!botShelf) {
-                    console.log('TreeManager.setBaseNode(): botShelf is null. Unexpected!');
-                    return false;
-                  } else {
-                    this.botShelf = botShelf;
-                    return true;
-                  }
-                }
-              }
-            }
-          }
+          shelves.push(this.getIdFromReference(parentNode.childrenReferences))
+        }
+        // update while condiditon
+        parentNodeId = parentNode.parentReferences[0].id // older parent
+        parentNodeExistsLocally = this.nodes.has(parentNodeId) // older parent
+        if (!parentNodeExistsLocally) { // same old parent
+          shelves.push([parentNode.selfReference.id]) // one last push XD
         }
       }
     }
+  
+    store.dispatch(setShelves(shelves))
   }
 
-  public async updateNode(id:string) {
-    const ref = doc(this.db, 'nodes', id).withConverter(treeNodeConverter);
-    const node = this.nodes.get(id);
-    if (!!node) {
-      const parent = node.parent;
-      const children = node.children;
-      if (!!children) {
-        await setDoc(ref, new TreeNode(parent, children));
+  private stopUpdatingOneNode() {
+    for (let i = this.recentNodes.length - 1; i >= 0; i--) {
+      let currentId = this.recentNodes[i]
+      this.recentNodes.pop()
+      if (this.nodes.has(currentId)) {
+        this.nodes.delete(currentId)
+        const unsub = this.updates.get(currentId)
+        this.updates.delete(currentId)
+        if (!unsub) {
+          console.log(`TreeManager.stopUpdatingOneNode(): unsub was none for id ${currentId}, unexpected!!!`)
+        } else {
+          unsub()
+        }
+        break
       }
     }
   }
 
-  public async uploadNode(base:INode, name:string) {
-    // load new node -> get back id
-    const ref = collection(this.db, 'nodes').withConverter(treeNodeConverter);
-    const docRef = await addDoc(ref, new TreeNode(base, []));
-    if (!!docRef) {
-      // update local TreeNode with new child
-      const newChild = new Node(docRef.id, name);
-      const treeNode = this.nodes.get(base.id);
-      if (!!treeNode) {
-        treeNode.children.push(newChild);
-        this.nodes.set(base.id, treeNode);
-      } else {
-        console.log('Base reference doesn\'t exist!')
-      }
-      // add new TreeNode for that child
-      const newTreeNode:ITreeNode = {
-        parent: base,
-        children: []
-      }
-      this.nodes.set(docRef.id, newTreeNode);
-      // update base node on firebase
-      this.updateNode(base.id);
+  private async downloadNode (nodeId:string) {
+    if (!nodeId) {
+      console.log('TreeManager.downloadNode(): nodeId is null!')
+      return
     }
+    if (this.nodes.size >= this.numberOfNodesToWatch) {
+      this.stopUpdatingOneNode()
+    }
+    const unsub = onSnapshot(doc(this.db, 'nodes', nodeId).withConverter(nodeConverter), (docSnap) => {
+      const node = docSnap.data()
+      if (!node) {
+        console.log('TreeManager.downloadNode(): no data!')
+        if (this.recentNodes.length > 1) {
+          console.log('TreeManager.downloadNode(): try setting base from history!')
+          this.recentNodes.shift()
+          this.setBase(this.recentNodes[0])
+          return
+        } else {
+          console.log('TreeManager.dowloadNode(): setting base to the default!')
+          this.recentNodes = []
+          this.setBase(this.defaultNodeId)
+          return
+        }
+      }
+      this.nodes.set(nodeId, node)
+      this.setBase(this.recentNodes[0])
+    })
+    this.updates.set(nodeId, unsub)
   }
 
-  public getParent(node:INode):INode {
-    const treeNode = this.nodes.get(node.id);
-    if (!treeNode) {
-      console.log('TreeManager.getParent(): treeNode is null.');
-      return node;
+  public newChild(creatorId:string, 
+                  creatorUserName:string,
+                  newNodeName:string) {
+    const parentId = this.recentNodes[0]
+    const creationDateTime = Date.now()
+    const parent = this.nodes.get(parentId)
+    if (!parent) {
+      console.log('TreeManager.createNewNode(): unexpected error, parent node doesn\'t exists locally')
+      return false
+    }
+    const creatorIds = [...parent.creatorIds]
+    creatorIds.unshift(creatorId)
+    const parentReferences = [...parent.parentReferences]
+    parentReferences.unshift(parent.selfReference)
+    const childrenReferences = []
+    const newNodeId = this.getNewId()
+    const selfReference = new NodeReference(newNodeId, newNodeName)
+    const newNode = new Node(creationDateTime,
+            creatorIds,
+            creatorId,
+            creatorUserName,
+            parentReferences,
+            childrenReferences,
+            selfReference)
+    this.nodes.set(newNodeId, newNode)
+    parent.childrenReferences.push(selfReference)
+    this.uploadNode(parent)
+    this.uploadNode(newNode)
+    this.setBase(parentId)
+  }
+
+
+  public deleteBase() {
+    const node = this.nodes.get(this.recentNodes[0])
+    this.recentNodes.shift()
+    if (!node) {
+      console.log('TreeManager.deleteCurrentBaseNode(): unexpected error!')
+      return
+    }
+    if (node.childrenReferences.length != 0) {
+      alert('node must have no children')
+      return
+    }
+    if (this.isRootNode(node)) {
+      alert('cannot delete root node')
+      return
+    }
+    // remove updates
+    const unsub = this.updates.get(node.selfReference.id)
+    if (!unsub) {
     } else {
-      return treeNode.parent;
+      unsub()
     }
-  }
-
-  public async deleteNode(node:INode) {
-    if (this.nodes.has(node.id)) {
-      const treeNode = this.nodes.get(node.id);
-      if (!!treeNode) {
-        // if treeNode has children abort (not supported funcitonality yet)
-        if (treeNode.children.length > 0) {
-          console.log('Cannot delete node that has children!');
-          console.log('Functionality is not yet supported!');
-          return;
-        }
-
-        // if TreeNode exists delete it
-        this.nodes.delete(node.id);
-        // remove reference from the parent node
-        const parentNode = treeNode.parent;
-        if (!!parentNode) {
-          const parentTreeNode = this.nodes.get(parentNode.id);
-          if (!!parentTreeNode) {
-            const parentChildren = parentTreeNode.children;
-            let newParentChildren:INode[] = [];
-            parentChildren.forEach((child) => {
-              if (child.id != node.id) {
-                newParentChildren.push(child);
-              }
-            });
-            parentTreeNode.children = newParentChildren;
-            this.nodes.set(parentNode.id, parentTreeNode);
-
-            // update parent node with no reference
-            await this.updateNode(parentNode.id);
-
-            // delete TreeNode from the firebase
-            await deleteDoc(doc(this.db, 'nodes', node.id));
-          }
-        }
+    this.updates.delete(node.selfReference.id)
+    // remove locally
+    this.nodes.delete(node.selfReference.id)
+    // remove web
+    deleteDoc(doc(this.db, 'nodes', node.selfReference.id))
+      .then((res) => {
+        // do nothing, success
+      }).catch((err) => {
+        console.log(err)
+        alert(err.message)
+      })
+    // remove parent web reference -> updates locally -> rerenders
+    const parent = this.nodes.get(node.parentReferences[0].id)
+    if (!parent) {
+      console.log('TreeManager.deleteCurrentBaseNode(): unexpected error!')
+      return
+    }
+    const badReference = node.selfReference
+    let badIndex = -1
+    for (let [index, reference] of parent.childrenReferences.entries()) {
+      if (reference.id == badReference.id) {
+        badIndex = index
+        break
       }
     }
+    const newChidlrenReferences = [...parent.childrenReferences]
+    if (badIndex !== -1) {
+      newChidlrenReferences.splice(badIndex, 1)
+    } else {
+      console.log('TreeManager.deleteCurrentBaseNode(): bad index of to delete child reference!')
+    }
+    parent.childrenReferences = newChidlrenReferences
+    this.nodes.set(parent.selfReference.id, parent)
+    this.setBase(parent.selfReference.id)
+    const parentRef = doc(this.db, 'nodes', parent.selfReference.id).withConverter(nodeConverter)
+    setDoc(parentRef, parent)
+      .then((res) => {
+        // do nothing success
+      }).catch((err) => {
+        console.log(err)
+        alert(err.message)
+      })
+    store.dispatch(setBaseNode(parent.selfReference.id))
+  }
+
+  private isRootNode (node:Node) {
+    if (node.selfReference.id == node.parentReferences[0].id) {
+      return true
+    }
+    return false
+  }
+
+  private getNewId () {
+    const newNodeRef = doc(collection(this.db, 'nodes'))
+    return newNodeRef.id
+  }
+
+  private uploadNode (node:Node) {
+    const ref = doc(this.db, 'nodes', node.selfReference.id).withConverter(nodeConverter)
+    setDoc(ref, node)
+      .then((res) => {
+        // success, do nothing
+      }).catch((err) => {
+        console.log(err)
+        alert(err.message)
+      })
   }
 }

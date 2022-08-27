@@ -2,7 +2,8 @@
 
 html,
 body {
-  font-family: "Comfortaa"; 
+  font-family: "Comfortaa";
+  background: black;
 }
 
 * {
@@ -26,4 +27,8 @@ a {
 .btn:hover {
   color: green;
   border-color: green;
+}
+
+.container {
+  width: 1280px;
 }
