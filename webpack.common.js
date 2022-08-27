@@ -29,7 +29,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        include: [__dirname + '/src'],
+        include: [__dirname],
         use: [{loader: 'style-loader'},{ loader: 'css-loader'}]
       },
       {

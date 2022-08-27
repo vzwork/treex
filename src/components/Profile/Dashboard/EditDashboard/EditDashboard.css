@@ -1,0 +1,54 @@
+.editDashboard {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: calc(100vh - 40px);
+}
+
+.closeEditDashboardButton {
+    background: rgb(0, 0, 0, 0.7);
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: calc(100vh);
+}
+
+.editDashboardContent {
+    background: #ddd;
+    position: fixed;
+    z-index: 3;
+    width: 320px;
+    left: calc(50vw - 177px);
+    height: 280px;
+    top: 10vh;
+    padding: 1rem;
+    border-radius: 1rem;
+}
+
+.editDashboardContent .header {
+    font-size: 1.3rem;
+    text-align: center;
+    padding: 1rem;
+}
+
+.editDashboardContent input {
+    width: 300px;
+    padding: 9px;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+}
+
+.saveChangesButton {
+    width: 322px;
+    padding: 9px;
+    height: 40px;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    color: white;
+    background: #333;
+}

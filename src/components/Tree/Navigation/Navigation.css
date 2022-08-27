@@ -1,0 +1,12 @@
+.navigation {
+    background: #aaa;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.navigation-shelves {
+    width: calc(100vw - 40px)
+}

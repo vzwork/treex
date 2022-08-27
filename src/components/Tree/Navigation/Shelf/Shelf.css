@@ -1,10 +1,12 @@
 .shelf {
-  border-top: 1px solid white;
+  height: 39px;
+  width: 100vw;
   display: flex;
   flex-direction: row;
   -ms-scroll-style: none;
   scrollbar-width: none;
   overflow-x: scroll;
+  border-top: 1px solid white;
 }
 
 .shelf::-webkit-scrollbar {

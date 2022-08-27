@@ -2,9 +2,17 @@
   position: absolute;
   z-index: 1;
   width: 100vw;
+  height: 40px;
+  background: #aaa;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.navbarContent {
   display: flex;
   justify-content: space-between;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
 }
 
 .navbar a {

@@ -1,40 +1,15 @@
-.tree {
-  display:flex;
-  flex-direction: column;
+.tree{
+    margin-top: 40px;
+    position: fixed;
+    width: 100vw;
+    height: calc(100vh - 40px);
 }
 
-.editTree{
-  position: absolute;
-  bottom: 0;
-  width: calc(100% - 16px);
-  padding: 0.5rem;
-  padding-top: 1rem;
-  border-radius: 0.5rem;
-  background: #ccc;
-  display: flex;
-  flex-direction: row-reverse;
+.reflex-splitter {
+    height: 10px!important;
+    
 }
-
-.navigation {
-  width: calc(100% - 100px);
-}
-
-.editTreeButtons {
-  width: 100px;
-  margin: 0.2rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.ebtn {
-  font-size: 1.2rem;
-}
-
-.inputNewNodeName {
-  background: white;
-  color: #000;
-  border: 1px black solid;
-  border-radius: 0.5rem;
-  padding: 0.3rem;
-  margin: 0.2rem;
+.reflex-splitter:hover {
+    background: rgb(134, 218, 134)!important;
+    transition: 0.6s!important;
 }

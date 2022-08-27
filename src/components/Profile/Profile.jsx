@@ -1,29 +1,24 @@
 import './Profile.css';
-import React, { useEffect } from 'react';
-import { Link, Navigate, Outlet, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { useAuthState } from "react-firebase-hooks/auth";
-import {
-  auth,
-  registerWithEmailAndPassword,
-  signInWithGoogle,
-} from "../../data/firebaseAuth";
+import React from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+
+import { getAuth } from 'firebase/auth';
+import Guest from './Guest/Guest';
+import Dashboard from './Dashboard/Dashboard';
+import app from '../../data/firebaseApp';
 
 function Profile () {
-  const navigate = useNavigate();
-  const [user, loading, error] = useAuthState(auth);
-  useEffect(() => {
-    if (loading) return;
-    if (!user) {
-      navigate("/profile/guest");
-    } else {
-      navigate('/profile/dashboard');
-    }
-  }, [user, loading]);
+  const auth = getAuth(app)
+  const [user] = useAuthState(auth)
 
   return (
     <div className='profile'>
-      <Outlet />
+      <div className='container'>
+        <div className='profileContent'>
+          {!user ? <Guest /> : null}
+          {!user ? null : <Dashboard />}
+        </div>
+      </div>
     </div>
   );
 };
