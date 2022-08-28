@@ -1,5 +1,5 @@
 import './Tree.css'
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React from 'react'
 import Navigation from './Navigation/Navigation'
 import Interaction from './Interaction/Interaction'
 import { ReflexContainer, ReflexElement, ReflexSplitter } from 'react-reflex'
@@ -7,9 +7,9 @@ import 'react-reflex/styles.css'
 
 
 const Tree = () => {
-    const MyHandle = (props) => {
-        return <div ref={props.innerref} className="handle" {...props} /> 
-    }
+    // const dispatch = useDispatch()
+    // dispatch(clearProfileData())
+    // dispatch(clearTreeData())
 
     return (
         <div className='tree'>

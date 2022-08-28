@@ -1,7 +1,5 @@
 import './Node.css';
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { increaseRequestCount, setBaseNode } from '../../../../../store/actions';
 import { TreeManager } from '../../../../../data/TreeManager';
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth } from 'firebase/auth';
@@ -11,7 +9,6 @@ const treeManager = TreeManager.getInstance()
 
 const Node = (props) => {
   const auth = getAuth(app)
-  const dispatch = useDispatch()
   const [user, loading, error] = useAuthState(auth);
   
   const id = props.id;

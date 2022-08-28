@@ -1,18 +1,10 @@
 import './Navigation.css'
 import React, { useRef, useEffect, useState } from 'react'
-import { TreeManager } from '../../../data/TreeManager'
 import Shelf from './Shelf/Shelf'
 import EditTree from './EditTree/EditTree'
 import AddNode from './AddNode/AddNode'
 import DeleteNode from './DeleteNode/DeleteNode'
 import { useSelector } from 'react-redux'
-import { useDispatch } from 'react-redux'
-import { clearTreeData } from '../../../store/actions'
-
-const treeManager = TreeManager.getInstance()
-if (treeManager.recentNodes.length == 0) {
-    treeManager.setBase('KSLC3E9YXXNJNKx23LqV')
-}
 
 const Navigation = () => {
     const [addNode, setAddNode] = useState(false)
