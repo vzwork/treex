@@ -11,7 +11,6 @@ import { clearTreeData } from '../../../store/actions'
 
 const treeManager = TreeManager.getInstance()
 if (treeManager.recentNodes.length == 0) {
-    console.log('set tree to default')
     treeManager.setBase('KSLC3E9YXXNJNKx23LqV')
 }
 
