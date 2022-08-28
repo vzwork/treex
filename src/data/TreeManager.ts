@@ -1,10 +1,9 @@
 import app from './firebaseApp'
-import { INode, Node, nodeConverter, NodeReference } from './Node'
-import { getFirestore, doc, onSnapshot, collection, setDoc, deleteDoc, Firestore, Unsubscribe } from 'firebase/firestore'
+import { Node, nodeConverter, NodeReference } from './Node'
+import { getFirestore, doc, onSnapshot, collection, setDoc, deleteDoc, Firestore, Unsubscribe, getDoc } from 'firebase/firestore'
 import { useDispatch } from 'react-redux'
 import { setShelves, setBaseNode } from '../store/actions'
 import store from '../store'
-import { map } from '@firebase/util'
 
 export class TreeManager {
   // vvv fields vvv
@@ -44,77 +43,93 @@ export class TreeManager {
     const out:string[] = []
     references.forEach((reference) => {
       out.push(reference.id)
-      this.names.set(reference.id, reference.name)
     })
     return out
   }
 
-  public setBase(id:string) {
-    // update history
-    this.recentNodes.unshift(id)
+  private setNameFromReference(references:NodeReference[]) {
+    references.forEach((reference) => {
+      this.names.set(reference.id, reference.name)
+    })
+  }
 
-    // make sure we have node data
+  public async setBase(id:string) {
+    if (!id) { console.log(`TreeManager.setBase(): what is this (${id})`); return }
+
     const nodeExistsLocally = this.nodes.has(id)
     if (!nodeExistsLocally) {
-      // we leave the process to the download node
-      // that is because we want updates to regenerate the tree
-      // meaning on each update -downloadNode()- the tree will call -setBase()-
-      this.downloadNode(id)
-      return
+      const goodDownload = await this.downloadNode(id)
+      if (!goodDownload) {
+        if (this.recentNodes.length > 0) {
+          this.setBase(this.recentNodes[0])
+          return
+        } else {
+          this.setBase(this.defaultNodeId)
+        }
+      }
+      this.udpateNode(id)
     }
-
     const shelves:string[][] = []
+    this.names.clear()
+
     // build top shelf
     const base = this.nodes.get(id)
-    if (!base) {
-      console.log(`TreeManager.setBaseNode(): map has no data for id ${id}, unexpected!!!`)
-      return
-    }
+    if (!base) { console.log(`TreeManager.setBase(): no local instance of ${id}`); return }
     shelves.push(this.getIdFromReference(base.childrenReferences))
+    this.setNameFromReference(base.childrenReferences)
+    
     // build mid shelf
-    if (this.isRootNode(base)) {
+    const isRoot = this.isRoot(base)
+    if (isRoot) {
       shelves.push([base.selfReference.id])
       this.names.set(base.selfReference.id, base.selfReference.name)
     } else {
-      let parentNodeReferecne = base.parentReferences[0]
-      let parentNodeId = parentNodeReferecne.id
-      let parentNodeExistsLocally = this.nodes.has(parentNodeId)
+      let parentId = base.parentReferences[0].id
+      let parentNodeExistsLocally = this.nodes.has(id)
       if (!parentNodeExistsLocally) {
-        this.downloadNode(parentNodeId)
-        return
+        const goodDownload = await this.downloadNode(parentId)
+        if (!goodDownload) {
+          // you should always be able to download parent, if child was downloaded, criticall error
+          console.log(`TreeManager.setBase(): criticall error, parent not availbe on web. Id (${parentId})`)
+          this.setBase(this.defaultNodeId)
+          return
+        }
+        this.udpateNode(id)
       }
-      let parentNode = this.nodes.get(parentNodeId)
-      if (!parentNode) {
-        console.log(`TreeManager.setBaseNode(): map has no data for id ${parentNodeId}, unexpected!!!`)
-        return
-      }
+      let parent = this.nodes.get(parentId)
+      if (!parent) { console.log(`Treemanager.setBase(): no local isntance of id ${parentId}`); return}
 
       // build the rest of bottom shelves
       // stop at root node or if reference is not downloaded
       while (parentNodeExistsLocally) {
-        parentNode = this.nodes.get(parentNodeId)
-        if (!parentNode) {
-          console.log(`TreeManager.setBaseNode(): map has no data for id ${parentNodeId}, unexpected!!!`)
+        parent = this.nodes.get(parentId)
+        if (!parent) {
+          console.log(`TreeManager.setBaseNode(): map has no data for id ${parentId}, unexpected!!!`)
           return
         }
-        if (this.isRootNode(parentNode)) {
-          shelves.push(this.getIdFromReference(parentNode.childrenReferences))
-          shelves.push([parentNode.selfReference.id])
-          this.names.set(parentNode.selfReference.id, parentNode.selfReference.name)
+        if (this.isRoot(parent)) {
+          shelves.push(this.getIdFromReference(parent.childrenReferences))
+          this.setNameFromReference(parent.childrenReferences)
+          shelves.push([parent.selfReference.id])
+          this.names.set(parent.selfReference.id, parent.selfReference.name)
           break
         } else {
-          shelves.push(this.getIdFromReference(parentNode.childrenReferences))
+          shelves.push(this.getIdFromReference(parent.childrenReferences))
+          this.setNameFromReference(parent.childrenReferences)
         }
         // update while condiditon
-        parentNodeId = parentNode.parentReferences[0].id // older parent
-        parentNodeExistsLocally = this.nodes.has(parentNodeId) // older parent
+        parentId = parent.parentReferences[0].id // older parent
+        parentNodeExistsLocally = this.nodes.has(parentId) // older parent
         if (!parentNodeExistsLocally) { // same old parent
-          shelves.push([parentNode.selfReference.id]) // one last push XD
+          shelves.push([parent.selfReference.id]) // one last push XD
+          this.names.set(parent.selfReference.id, parent.selfReference.name)
         }
       }
     }
-  
     store.dispatch(setShelves(shelves))
+    if (this.recentNodes[0] != id) {
+      this.recentNodes.unshift(id)
+    }
   }
 
   private stopUpdatingOneNode() {
@@ -135,34 +150,51 @@ export class TreeManager {
     }
   }
 
-  private async downloadNode (nodeId:string) {
-    if (!nodeId) {
-      console.log('TreeManager.downloadNode(): nodeId is null!')
-      return
-    }
-    if (this.nodes.size >= this.numberOfNodesToWatch) {
-      this.stopUpdatingOneNode()
-    }
-    const unsub = onSnapshot(doc(this.db, 'nodes', nodeId).withConverter(nodeConverter), (docSnap) => {
+  private async downloadNode (id:string) {
+    if (!id) { console.log(`TreeManager.downloadNode(): what is this id (${id})`); return false }
+    const docRef = doc(this.db, 'nodes', id).withConverter(nodeConverter)
+    await getDoc(docRef)
+      .then((res) => {
+        const node = res.data()
+        if (!node) { console.log(`TreeManager.downloadNode(): what is this node (${node})`); return false }
+        this.nodes.set(id, node)
+      }).catch((err) => {
+        console.log(err)
+        alert(err.message)
+      })
+    return true
+  }
+
+  private async udpateNode (id:string) {
+    if (!id) { console.log('TreeManager.updateNode(): id is null!'); return }
+    if (this.nodes.size >= this.numberOfNodesToWatch) { this.stopUpdatingOneNode() }
+    const unsub = onSnapshot(doc(this.db, 'nodes', id).withConverter(nodeConverter), (docSnap) => {
       const node = docSnap.data()
+      // node got deleted
       if (!node) {
-        console.log('TreeManager.downloadNode(): no data!')
+        console.log(`TreeManager.updateNode(): node got deleted id (${id})`)
+        this.nodes.delete(id)
         if (this.recentNodes.length > 1) {
-          console.log('TreeManager.downloadNode(): try setting base from history!')
           this.recentNodes.shift()
           this.setBase(this.recentNodes[0])
-          return
         } else {
-          console.log('TreeManager.dowloadNode(): setting base to the default!')
-          this.recentNodes = []
           this.setBase(this.defaultNodeId)
-          return
+        }
+        unsub()
+        return
+      }
+      const localNode = this.nodes.get(id)
+      // node was updated
+      if (localNode !== node) {
+        this.nodes.set(id, node)
+        if (this.recentNodes.length > 0) {
+          this.setBase(this.recentNodes[0])
+        } else {
+          this.setBase(this.defaultNodeId)
         }
       }
-      this.nodes.set(nodeId, node)
-      this.setBase(this.recentNodes[0])
     })
-    this.updates.set(nodeId, unsub)
+    this.updates.set(id, unsub)
   }
 
   public newChild(creatorId:string, 
@@ -208,7 +240,7 @@ export class TreeManager {
       alert('node must have no children')
       return
     }
-    if (this.isRootNode(node)) {
+    if (this.isRoot(node)) {
       alert('cannot delete root node')
       return
     }
@@ -263,7 +295,7 @@ export class TreeManager {
     store.dispatch(setBaseNode(parent.selfReference.id))
   }
 
-  private isRootNode (node:Node) {
+  private isRoot (node:Node) {
     if (node.selfReference.id == node.parentReferences[0].id) {
       return true
     }
