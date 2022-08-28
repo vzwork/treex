@@ -31,7 +31,7 @@ class App extends Component {
   render() {
     return (
       <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
+        <PersistGate persistor={persistor}>
           <div id='App'>
             <div className={(this.state.light ? 'theme--light' : 'theme--default')}>
               <HashRouter

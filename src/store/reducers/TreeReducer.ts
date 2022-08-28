@@ -1,18 +1,19 @@
-import { NodeReference } from '../../data/Node';
-import { CLEAR_TREE_DATA, SET_BASE_NODE, SET_SHELVES } from '../actions';
+import { CLEAR_TREE_DATA, SET_BASE_NODE, SET_HISTORY, SET_SHELVES } from '../actions';
 
 export interface ITreeState {
   baseId: string
   shelves: string[][]
+  history: string[]
 }
 
 const defaultState:ITreeState = {
   baseId: 'KSLC3E9YXXNJNKx23LqV',
-  shelves: []
+  shelves: [],
+  history: []
 };
 
 
-const rootReducer = (state = defaultState, action: any) => {
+const treeReducer = (state = defaultState, action: any) => {
   switch (action.type) {
     case CLEAR_TREE_DATA:
       return {
@@ -28,9 +29,14 @@ const rootReducer = (state = defaultState, action: any) => {
         ...state,
         shelves: action.payload
       }
+    case SET_HISTORY:
+      return {
+        ...state,
+        history: action.payload
+      }
     default:
       return state;
   };
 }
 
-export default rootReducer;
+export default treeReducer;

@@ -2,7 +2,7 @@ import app from './firebaseApp'
 import { Node, nodeConverter, NodeReference } from './Node'
 import { getFirestore, doc, onSnapshot, collection, setDoc, deleteDoc, Firestore, Unsubscribe, getDoc } from 'firebase/firestore'
 import { useDispatch } from 'react-redux'
-import { setShelves, setBaseNode } from '../store/actions'
+import { setShelves, setBaseNode, setHistory } from '../store/actions'
 import store from '../store'
 
 export class TreeManager {
@@ -29,6 +29,7 @@ export class TreeManager {
     this.nodes = new Map<string, Node>();
     this.names = new Map<string, string>();
     this.recentNodes = []; // [recent -> leastRecent]
+    this.setBase('history')
     this.updates = new Map<string, Unsubscribe>();
   }
   // ^^^ Singleton ^^^
@@ -55,6 +56,17 @@ export class TreeManager {
 
   public async setBase(id:string) {
     if (!id) { console.log(`TreeManager.setBase(): what is this (${id})`); return }
+
+    if (id === 'history') {
+      await new Promise(f => setTimeout(f, 10)) // otherwise TreeManager loads before rehydration
+      this.recentNodes = store.getState().treeReducer.history
+      if (this.recentNodes.length > 0) {
+        this.setBase(this.recentNodes[0])
+      } else {
+        this.setBase(this.defaultNodeId)
+      }
+      return
+    }
 
     const nodeExistsLocally = this.nodes.has(id)
     if (!nodeExistsLocally) {
@@ -85,7 +97,7 @@ export class TreeManager {
       this.names.set(base.selfReference.id, base.selfReference.name)
     } else {
       let parentId = base.parentReferences[0].id
-      let parentNodeExistsLocally = this.nodes.has(id)
+      let parentNodeExistsLocally = this.nodes.has(parentId)
       if (!parentNodeExistsLocally) {
         const goodDownload = await this.downloadNode(parentId)
         if (!goodDownload) {
@@ -129,6 +141,10 @@ export class TreeManager {
     store.dispatch(setShelves(shelves))
     if (this.recentNodes[0] != id) {
       this.recentNodes.unshift(id)
+      if (this.recentNodes.length > 20) {
+        this.stopUpdatingOneNode()
+      }
+      store.dispatch(setHistory(this.recentNodes))
     }
   }
 
@@ -232,6 +248,8 @@ export class TreeManager {
   public deleteBase() {
     const node = this.nodes.get(this.recentNodes[0])
     this.recentNodes.shift()
+    console.log(this.recentNodes)
+    store.dispatch(setHistory(this.recentNodes))
     if (!node) {
       console.log('TreeManager.deleteCurrentBaseNode(): unexpected error!')
       return
