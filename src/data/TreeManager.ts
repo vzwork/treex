@@ -63,13 +63,16 @@ export class TreeManager {
       if (!history) {
         console.log('history was not made that day')
         this.setBase(this.defaultNodeId)
+        return
       } else {
         if (history.length == 0) {
           console.log('first time history is empty')
           this.setBase(this.defaultNodeId)
+          return
         } else {
           this.recentNodes = history
           this.setBase(this.recentNodes[0])
+          return
         }
       }
     }
