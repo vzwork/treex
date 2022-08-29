@@ -64,17 +64,18 @@ export class TreeManager {
         this.setBase(this.defaultNodeId)
         return
       }
-      this.setBase(this.defaultNodeId)
-      // if (store.getState().treeReducer.history) {
-      //   this.recentNodes = store.getState().treeReducer.history
-      //   if (this.recentNodes.length > 0) {
-      //     this.setBase(this.recentNodes[0])
-      //   } else {
-      //     this.setBase(this.defaultNodeId)
-      //   }
-      // } else {
-      //   this.setBase(this.defaultNodeId)
-      // }
+      this.recentNodes = store.getState().treeReducer.history
+      if (!this.recentNodes) {
+        console.log(this.recentNodes)
+        this.recentNodes = []
+        this.setBase(this.defaultNodeId)
+        return
+      }
+      if (this.recentNodes.length == 0) {
+        this.setBase(this.defaultNodeId)
+        return
+      }
+      this.setBase(this.recentNodes[0])
       return
     }
 
