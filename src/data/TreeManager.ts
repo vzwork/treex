@@ -58,17 +58,18 @@ export class TreeManager {
     if (!id) { console.log(`TreeManager.setBase(): what is this (${id})`); return }
 
     if (id === 'history') {
-      await new Promise(f => setTimeout(f, 100)) // otherwise TreeManager loads before rehydration
-      if (store.getState().treeReducer.history) {
-        this.recentNodes = store.getState().treeReducer.history
-        if (this.recentNodes.length > 0) {
-          this.setBase(this.recentNodes[0])
-        } else {
-          this.setBase(this.defaultNodeId)
-        }
-      } else {
-        this.setBase(this.defaultNodeId)
-      }
+      this.setBase(this.defaultNodeId)
+      // await new Promise(f => setTimeout(f, 100)) // otherwise TreeManager loads before rehydration
+      // if (store.getState().treeReducer.history) {
+      //   this.recentNodes = store.getState().treeReducer.history
+      //   if (this.recentNodes.length > 0) {
+      //     this.setBase(this.recentNodes[0])
+      //   } else {
+      //     this.setBase(this.defaultNodeId)
+      //   }
+      // } else {
+      //   this.setBase(this.defaultNodeId)
+      // }
       return
     }
 
