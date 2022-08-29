@@ -6,9 +6,10 @@ import { ReflexContainer, ReflexElement, ReflexSplitter } from 'react-reflex'
 import 'react-reflex/styles.css'
 import { TreeManager } from '../../data/TreeManager'
 
-const Tree = () => {
+const Tree = async () => {
     const treeManager = TreeManager.getInstance()
     if (treeManager.recentNodes.length == 0) {
+        await new Promise(f => setTimeout(f, 1000))
         treeManager.setBase('history')
     }
     // const dispatch = useDispatch()
