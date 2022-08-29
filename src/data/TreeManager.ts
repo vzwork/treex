@@ -29,7 +29,6 @@ export class TreeManager {
     this.nodes = new Map<string, Node>();
     this.names = new Map<string, string>();
     this.recentNodes = []; // [recent -> leastRecent]
-    this.setBase('history')
     this.updates = new Map<string, Unsubscribe>();
   }
   // ^^^ Singleton ^^^
@@ -58,7 +57,7 @@ export class TreeManager {
     if (!id) { console.log(`TreeManager.setBase(): what is this (${id})`); return }
 
     if (id === 'history') {
-      await new Promise(f => setTimeout(f, 10000)) // otherwise TreeManager loads before rehydration
+      // await new Promise(f => setTimeout(f, 10000)) // otherwise TreeManager loads before rehydration
       const history = store.getState().treeReducer.history
       if (!history) {
         console.log('history was not made that day')
