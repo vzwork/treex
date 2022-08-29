@@ -58,7 +58,7 @@ export class TreeManager {
     if (!id) { console.log(`TreeManager.setBase(): what is this (${id})`); return }
 
     if (id === 'history') {
-      await new Promise(f => setTimeout(f, 1000)) // otherwise TreeManager loads before rehydration
+      await new Promise(f => setTimeout(f, 10000)) // otherwise TreeManager loads before rehydration
       const history = store.getState().treeReducer.history
       if (!history) {
         console.log('history was not made that day')
