@@ -63,6 +63,8 @@ export class TreeManager {
         this.recentNodes = store.getState().treeReducer.history
         if (this.recentNodes.length > 0) {
           this.setBase(this.recentNodes[0])
+        } else {
+          this.setBase(this.defaultNodeId)
         }
       } else {
         this.setBase(this.defaultNodeId)
