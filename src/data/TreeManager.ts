@@ -4,6 +4,7 @@ import { getFirestore, doc, onSnapshot, collection, setDoc, deleteDoc, Firestore
 import { useDispatch } from 'react-redux'
 import { setShelves, setBaseNode, setHistory } from '../store/actions'
 import store from '../store'
+import { NameAndParents, nameAndParentsConverter } from './NameAndParents'
 
 export class TreeManager {
   // vvv fields vvv
@@ -38,7 +39,7 @@ export class TreeManager {
     return '-----'; 
   }
 
-  // redux taxes serializable forms of data, not NodeReference, we convert to array of ids
+  // redux takes serializable forms of data, not NodeReference, we convert to array of ids
   private getIdFromReference(references:NodeReference[]) {
     const out:string[] = []
     references.forEach((reference) => {
@@ -249,14 +250,24 @@ export class TreeManager {
     this.uploadNode(parent)
     this.uploadNode(newNode)
     this.setBase(parentId)
+
+    // also update nameAndParents
+    const refNap = doc(this.db, 'nameAndParents', newNode.selfReference.id).withConverter(nameAndParentsConverter)
+    const nap = new NameAndParents(newNode.selfReference.name, newNode.parentReferences)
+    setDoc(refNap, nap)
+      .then((res) => {
+        // big success
+      }).catch((err) => {
+        console.log('TreeManager.uploadNode(): couldn\'t save nameAndParents doc')
+        console.log(err)
+        alert(err.message)
+      })
   }
 
 
   public deleteBase() {
     const node = this.nodes.get(this.recentNodes[0])
     this.recentNodes.shift()
-    console.log(this.recentNodes)
-    store.dispatch(setHistory(this.recentNodes))
     if (!node) {
       console.log('TreeManager.deleteCurrentBaseNode(): unexpected error!')
       return
@@ -280,6 +291,14 @@ export class TreeManager {
     this.nodes.delete(node.selfReference.id)
     // remove web
     deleteDoc(doc(this.db, 'nodes', node.selfReference.id))
+      .then((res) => {
+        // do nothing, success
+      }).catch((err) => {
+        console.log(err)
+        alert(err.message)
+      })
+    // remove nameAndParents
+    deleteDoc(doc(this.db, 'nameAndParents', node.selfReference.id))
       .then((res) => {
         // do nothing, success
       }).catch((err) => {
@@ -317,6 +336,7 @@ export class TreeManager {
         console.log(err)
         alert(err.message)
       })
+    store.dispatch(setHistory(this.recentNodes))
     store.dispatch(setBaseNode(parent.selfReference.id))
   }
 

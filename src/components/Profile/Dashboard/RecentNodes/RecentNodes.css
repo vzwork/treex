@@ -1,0 +1,21 @@
+.recentNodes {
+    margin-top: 0.5rem;
+    height: 60px;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    background: mediumaquamarine;
+    
+}
+
+.recentNodes-Nodes {
+    position: absolute;
+    width: 90%;
+    display: flex;
+    overflow: scroll;
+    -ms-scroll-style: none;
+    scrollbar-width: none;
+}
+
+.recentNodes-Nodes::-webkit-scrollbar {
+    display: none;
+  }
