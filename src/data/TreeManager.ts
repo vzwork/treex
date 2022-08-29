@@ -58,25 +58,20 @@ export class TreeManager {
     if (!id) { console.log(`TreeManager.setBase(): what is this (${id})`); return }
 
     if (id === 'history') {
-      await new Promise(f => setTimeout(f, 100)) // otherwise TreeManager loads before rehydration
-      if (!store.getState().treeReducer.history) {
-        console.log(store.getState().treeReducer.history)
+      await new Promise(f => setTimeout(f, 1000)) // otherwise TreeManager loads before rehydration
+      const history = store.getState().treeReducer.history
+      if (!history) {
+        console.log('history was not made that day')
         this.setBase(this.defaultNodeId)
-        return
+      } else {
+        if (history.length == 0) {
+          console.log('first time history is empty')
+          this.setBase(this.defaultNodeId)
+        } else {
+          this.recentNodes = history
+          this.setBase(this.recentNodes[0])
+        }
       }
-      this.recentNodes = store.getState().treeReducer.history
-      if (!this.recentNodes) {
-        console.log(this.recentNodes)
-        this.recentNodes = []
-        this.setBase(this.defaultNodeId)
-        return
-      }
-      if (this.recentNodes.length == 0) {
-        this.setBase(this.defaultNodeId)
-        return
-      }
-      this.setBase(this.recentNodes[0])
-      return
     }
 
     const nodeExistsLocally = this.nodes.has(id)
