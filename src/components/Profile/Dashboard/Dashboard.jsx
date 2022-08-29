@@ -5,7 +5,7 @@ import { getAuth, signOut } from 'firebase/auth';
 import DeleteAccount from './DeleteAcccount/DeleteAccount';
 import { useDispatch } from 'react-redux';
 import { setCurrentId, setUserId } from '../../../store/actions';
-import FavoriteNodes from './FavoriteNodes/FavoriteNodes';
+import RecentNodes from './Recentnodes/RecentNodes';
 import EditDashboard from './EditDashboard/EditDashboard';
 import app from '../../../data/firebaseApp';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -18,12 +18,12 @@ function Dashboard() {
   const userId = useSelector((state) => state.profileReducer.userId)
   const currentId = useSelector((state) => state.profileReducer.currentId)
 
+  const profileManager = ProfileManager.getInstance()
   if (userId != user.uid) {
     dispatch(setUserId(user.uid)) // set default id to the authenticated user
   }
-
-  const profileManager = ProfileManager.getInstance()
   profileManager.generate()
+
 
   // vvv auth windows vvv
   const [deleteAccount, setDeleteAccount] = useState(false)
@@ -59,14 +59,17 @@ function Dashboard() {
       <div className='userInfo'>
         <div className='name'>
           {firstName + ' ' + lastName}
-          <button className='editDashboardButton' onClick={showEditDashboard}>edit</button>
+          {currentId == userId
+            ? <button className='editDashboardButton' onClick={showEditDashboard}>edit</button>
+            : null
+          }
         </div>
         <div className='userName'>
           {userName + ' '}
         </div>
       </div>
       <div className='activityInfo'>
-        <FavoriteNodes />
+        <RecentNodes />
       </div>
     </div>
   );

@@ -1,0 +1,17 @@
+.recentNode {
+  background: #ddd;
+  font-family: "Comfortaa";
+  font-size: 1.3rem;
+  margin: 3px;
+  padding: 0px 10px;
+  border-radius: 10px;
+  border: 1px solid white;
+}
+
+.recentNode:hover {
+  border: 1px solid black;
+}
+
+.base {
+  background: rgb(138, 186, 142);
+}

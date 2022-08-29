@@ -1,13 +1,10 @@
 import './EditDashboard.css';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
-import { setFirstName, setLastName, setUserName } from '../../../../store/actions/index';
 import { ProfileManager } from '../../../../data/ProfileManager';
 
 
 const EditDashboard = (props) => {
-    const dispatch = useDispatch();
     const closeEditDashboard = () => {
         props.setEditDashboard(false)
     }
