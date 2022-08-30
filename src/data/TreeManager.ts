@@ -1,8 +1,7 @@
 import app from './firebaseApp'
 import { Node, nodeConverter, NodeReference } from './Node'
-import { getFirestore, doc, onSnapshot, collection, setDoc, deleteDoc, Firestore, Unsubscribe, getDoc } from 'firebase/firestore'
-import { useDispatch } from 'react-redux'
-import { setShelves, setBaseNode, setHistory } from '../store/actions'
+import { getFirestore, doc, onSnapshot, collection, setDoc, deleteDoc, Firestore, Unsubscribe, getDoc, query, where, getDocs } from 'firebase/firestore'
+import { setShelves, setBaseNode, setHistory, setSearchResults } from '../store/actions'
 import store from '../store'
 import { NameAndParents, nameAndParentsConverter } from './NameAndParents'
 
@@ -15,6 +14,7 @@ export class TreeManager {
   names:Map<string, string>
   recentNodes:string[]
   updates:Map<string, Unsubscribe>
+  searchNames:Map<string,string>
   // ^^^ fields ^^^
 
   // vvv Singleton vvv
@@ -31,6 +31,7 @@ export class TreeManager {
     this.names = new Map<string, string>();
     this.recentNodes = []; // [recent -> leastRecent]
     this.updates = new Map<string, Unsubscribe>();
+    this.searchNames = new Map<string,string>();
   }
   // ^^^ Singleton ^^^
 
@@ -360,6 +361,35 @@ export class TreeManager {
       }).catch((err) => {
         console.log(err)
         alert(err.message)
+      })
+  }
+
+  public clearSearchNames() {
+    this.searchNames.clear();
+    store.dispatch(setSearchResults([]))
+  }
+
+  public setSearchName(name:string) {
+    const nodeRef = collection(this.db, 'nameAndParents').withConverter(nameAndParentsConverter)
+    const q = query(nodeRef, where('name', '==', name))
+    getDocs(q)
+      .then((res) => {
+        if (res.size > 0) {
+          const searchResults:string[][] = []
+          res.forEach((nap) => {
+            let currentResult:string[] = []
+            currentResult.push(nap.id)
+            this.searchNames.set(nap.id, nap.data().name)
+            nap.data().parents.forEach((parent) => {
+              currentResult.push(parent.id)
+              this.searchNames.set(parent.id, parent.name)
+            })
+            searchResults.push(currentResult)
+          })
+          store.dispatch(setSearchResults(searchResults))
+        }
+      }).catch((err) => {
+        console.log(err)
       })
   }
 }

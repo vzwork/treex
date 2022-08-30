@@ -2,6 +2,7 @@ import './EditTree.css'
 import React, { useState } from 'react'
 import { MdAddCircleOutline } from 'react-icons/md'
 import { TiDeleteOutline } from 'react-icons/ti'
+import { HiOutlineSearchCircle } from 'react-icons/hi'
 
 const EditTree = (props) => {
   return (
@@ -11,6 +12,9 @@ const EditTree = (props) => {
       </div>
       <div className='editTree-button' onClick={()=>{props.setDeleteNode(true)}}>
         <TiDeleteOutline />
+      </div>
+      <div className='editTree-button' onClick={()=>{props.setSearch(true)}}>
+        <HiOutlineSearchCircle />
       </div>
     </div>
   )
