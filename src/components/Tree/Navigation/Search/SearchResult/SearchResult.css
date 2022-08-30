@@ -1,0 +1,29 @@
+.searchResult {
+  padding: 0 5px;
+  font-size: 1.2rem;
+  display: flex;
+  border-bottom: solid 1px #eee;
+}
+
+.parentNodes {
+  font-size: 1rem;
+  height: min-content;
+  display: flex;
+}
+
+.parentNodes > * {
+  background: #ddd!important;
+}
+
+.searchNode {
+  background: white;
+  border-radius: 4px;
+  border: solid 1px mediumaquamarine;
+  padding: 2px;
+  margin: 2px;
+  cursor: pointer;
+}
+
+.searchNode:hover {
+  border: solid 1px black;
+}
