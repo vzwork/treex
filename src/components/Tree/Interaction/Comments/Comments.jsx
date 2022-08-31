@@ -19,6 +19,7 @@ const Comments = () => {
     <div className='comments'>
       <div className='commentsInput'>
         <input type="text"
+          value={newComment}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               sendComment()
