@@ -5,10 +5,11 @@ import { setShelves, setBaseNode, setHistory, setSearchResults } from '../store/
 import store from '../store'
 import { NameAndParents, nameAndParentsConverter } from './NameAndParents'
 import { CommentsManager } from './CommentsManager'
+import { FileManager } from './FileManager'
 
 export class TreeManager {
   // vvv fields vvv
-  numberOfNodesToWatch = 10
+  numberOfNodesToWatch = 20
   defaultNodeId = 'KSLC3E9YXXNJNKx23LqV'
   db:Firestore
   nodes:Map<string, Node>
@@ -151,13 +152,17 @@ export class TreeManager {
     store.dispatch(setShelves(shelves))
     if (this.recentNodes[0] != id) {
       this.recentNodes.unshift(id)
-      if (this.recentNodes.length > 20) {
-        this.stopUpdatingOneNode()
+      if (this.recentNodes.length > this.numberOfNodesToWatch) {
+        if (this.nodes.size > this.numberOfNodesToWatch) {
+          this.stopUpdatingOneNode()
+        }
       }
       store.dispatch(setHistory(this.recentNodes))
     }
     const commentsManager = CommentsManager.getInstance()
     commentsManager.setBase(id)
+    const fileManager = FileManager.getInstance()
+    fileManager.setBase(id)
   }
 
   private stopUpdatingOneNode() {

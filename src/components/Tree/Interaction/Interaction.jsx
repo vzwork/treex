@@ -13,13 +13,13 @@ const Interaction = () => {
     
     return (
         <div className='interaction'>
-            <InteractionBar />
+            {/* <InteractionBar /> */}
             <ReflexContainer orientation='horizontal'>
-                <ReflexElement >
+                <ReflexElement size={300} minSize={60}>
                     <File />
                 </ReflexElement>
                 <ReflexSplitter className='interaction-splitter'/>
-                <ReflexElement size={800} minSize={120}>
+                <ReflexElement size={800} minSize={220}>
                     <Comments />
                 </ReflexElement>
             </ReflexContainer>

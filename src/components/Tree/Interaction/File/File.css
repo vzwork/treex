@@ -1,0 +1,26 @@
+.file {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: green;
+}
+
+.fileTextInput {
+  font-size: 1rem;
+  padding: 5px;
+  font-family: 'Comfortaa';
+  width: calc(100% - 10px);
+  height: calc(100% - 40px);
+  border: none;
+}
+
+.fileSaveButton {
+  cursor: pointer;
+  background-color: orange;
+  width: calc(100% - 2px);
+  height: 20px;
+  text-align: center;
+  padding: 1px 0;
+  border: 1px white;
+  margin: 1px 1px;
+}

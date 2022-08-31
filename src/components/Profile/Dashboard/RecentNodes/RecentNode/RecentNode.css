@@ -1,4 +1,6 @@
 .recentNode {
+  position: relative;
+  z-index: 0;
   background: #ddd;
   font-family: "Comfortaa";
   font-size: 1.3rem;
@@ -6,6 +8,8 @@
   padding: 0px 10px;
   border-radius: 10px;
   border: 1px solid white;
+  height: min-content;
+  white-space: nowrap;
 }
 
 .recentNode:hover {
