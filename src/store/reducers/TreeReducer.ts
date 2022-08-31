@@ -1,4 +1,4 @@
-import { CLEAR_TREE_DATA, SET_BASE_NODE, SET_COMMENTS, SET_HISTORY, SET_SEARCH_RESULTS, SET_SHELVES } from '../actions';
+import { CLEAR_TREE_DATA, SET_BASE_NODE, SET_COMMENTS, SET_FILE, SET_HISTORY, SET_SEARCH_RESULTS, SET_SHELVES } from '../actions';
 
 export interface ITreeState {
   baseId: string
@@ -6,6 +6,7 @@ export interface ITreeState {
   history: string[]
   searchResults: string[][]
   comments: object[]
+  file: string
 }
 
 const defaultState:ITreeState = {
@@ -13,7 +14,8 @@ const defaultState:ITreeState = {
   shelves: [],
   history: [],
   searchResults: [],
-  comments: []
+  comments: [],
+  file: ''
 };
 
 
@@ -47,6 +49,11 @@ const treeReducer = (state = defaultState, action: any) => {
       return {
         ...state,
         comments: action.payload
+      }
+    case SET_FILE:
+      return {
+        ...state,
+        file: action.payload
       }
     default:
       return state;

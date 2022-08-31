@@ -4,6 +4,7 @@ export const SET_SHELVES = 'SET_SHELVES'
 export const SET_HISTORY = 'SET_HISTORY'
 export const SET_SEARCH_RESULTS = 'SET_SEARCH_RESULTS'
 export const SET_COMMENTS = 'SET_COMMENTS'
+export const SET_FILE = 'SET_FILE'
 
 export const clearTreeData = () => ({
   type: CLEAR_TREE_DATA
@@ -32,4 +33,9 @@ export const setSearchResults = (results:string[][]) => ({
 export const setComments = (comments:object[]) => ({
   type: SET_COMMENTS,
   payload: comments
+})
+
+export const setFile = (file:string) => ({
+  type: SET_FILE,
+  payload: file
 })
