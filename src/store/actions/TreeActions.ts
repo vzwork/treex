@@ -3,6 +3,7 @@ export const SET_BASE_NODE = 'SET_BASE_NODE'
 export const SET_SHELVES = 'SET_SHELVES'
 export const SET_HISTORY = 'SET_HISTORY'
 export const SET_SEARCH_RESULTS = 'SET_SEARCH_RESULTS'
+export const SET_COMMENTS = 'SET_COMMENTS'
 
 export const clearTreeData = () => ({
   type: CLEAR_TREE_DATA
@@ -26,4 +27,9 @@ export const setHistory = (nodes:string[]) => ({
 export const setSearchResults = (results:string[][]) => ({
   type: SET_SEARCH_RESULTS,
   payload: results
+})
+
+export const setComments = (comments:object[]) => ({
+  type: SET_COMMENTS,
+  payload: comments
 })

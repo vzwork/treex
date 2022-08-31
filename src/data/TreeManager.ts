@@ -4,6 +4,7 @@ import { getFirestore, doc, onSnapshot, collection, setDoc, deleteDoc, Firestore
 import { setShelves, setBaseNode, setHistory, setSearchResults } from '../store/actions'
 import store from '../store'
 import { NameAndParents, nameAndParentsConverter } from './NameAndParents'
+import { CommentsManager } from './CommentsManager'
 
 export class TreeManager {
   // vvv fields vvv
@@ -155,6 +156,8 @@ export class TreeManager {
       }
       store.dispatch(setHistory(this.recentNodes))
     }
+    const commentsManager = CommentsManager.getInstance()
+    commentsManager.setBase(id)
   }
 
   private stopUpdatingOneNode() {
@@ -339,6 +342,9 @@ export class TreeManager {
       })
     store.dispatch(setHistory(this.recentNodes))
     store.dispatch(setBaseNode(parent.selfReference.id))
+    // remove comments 
+    const commentsManager = CommentsManager.getInstance()
+    commentsManager.deleteNode(node.selfReference.id)
   }
 
   private isRoot (node:Node) {
