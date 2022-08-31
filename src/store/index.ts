@@ -12,16 +12,29 @@ import storage from 'redux-persist/lib/storage' // defaults to localStorage for 
  
 import treeReducer from './reducers/TreeReducer'
 import profileReducer from './reducers/ProfileReducer'
+import createMigrate from 'redux-persist/es/createMigrate'
 
 const rootReducer = combineReducers({
   treeReducer,
   profileReducer
 })
 
+const migrations = {
+  2: state => {
+    return {
+      ...state,
+      treeReducer: {
+        file: ''
+      }
+    }
+  }
+}
+
 const persistConfig = {
   key: 'root',
-  version: 1,
+  version: 2,
   storage,
+  migrate: createMigrate(migrations)
 }
 
  
