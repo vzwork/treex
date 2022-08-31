@@ -1,0 +1,21 @@
+.comment {
+  padding: 2px;
+  margin: 2px;
+  display: flex;
+  flex-direction: row;
+}
+
+.commentDate {
+  margin-top: 5px;
+  font-size: 10px;
+}
+
+.commentAuthor {
+  font-size: 12px;
+  margin-top: 3px;
+  margin-left: 5px;
+}
+
+.commentText {
+  margin: 0 5px;
+}

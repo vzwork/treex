@@ -1,17 +1,18 @@
 import app from './firebaseApp';
 import { FirebaseApp } from 'firebase/app';
-import { getDatabase, onValue, push, ref, set } from 'firebase/database';
+import { Database, getDatabase, onValue, push, ref, remove, set } from 'firebase/database';
+import store from '../store'
+import { setComments } from '../store/actions';
+import { TreeManager } from './TreeManager';
 
 export class CommentsManager {
   // vvv fields vvv
-  app:FirebaseApp;
-  db; 
+  db:Database; 
   // ^^^ fields ^^^
 
   // vvv Singleton vvv
   private static instance: CommentsManager;
   private constructor() {
-    this.app = app;
     this.db = getDatabase(app);
   }
   public static getInstance(): CommentsManager {
@@ -22,41 +23,56 @@ export class CommentsManager {
   }
   // ^^^ Singleton ^^^
 
-  public updatesForNode(nodeId, callback) {
-    const nodeCommentsRef = ref(this.db, 'nodes/' + nodeId);
-    onValue(nodeCommentsRef, (snapshot) => {
+  public deleteNode(id:string) {
+    const commentsRef = ref(this.db, 'nodes/' + id)
+    remove(commentsRef)
+  }
+
+  public setBase(id:string) {
+    const commentsRef = ref(this.db, 'nodes/' + id + '/comments/')
+    const greetingValues = [
+      'Free your ideas!',
+      'Your ideas... gotta share \'em...',
+      'Brilliant, don\'t stop thinking!',
+      'This one is it, chief! Exactly it!',
+      'There is an idea here, you are the one to write it down though!'
+    ]
+    onValue(commentsRef, (snapshot) => {
       if (!snapshot.exists()) {
-        let date = new Date();
-        set(nodeCommentsRef, {
-            comments: [
-              {
-                date: date.getTime().toString(),
-                uId: '88888888',
-                uName: 'admin',
-                text: 'first comment!'
-              }
-            ]
-        });
+        set(commentsRef, [
+          {
+            date: Date.now(),
+            uId: 'NqT5XjbHvFVDobcNW9KVhd4Zsgz1',
+            uName: 'admin',
+            text: greetingValues[(Math.floor(Math.random() * greetingValues.length))]
+          }
+        ])
       } else {
-        callback(snapshot.val().comments);
+        let comments:any[] = []
+        snapshot.forEach((comment) => {
+          const data = comment.val()
+          comments.push(data)
+        })
+        store.dispatch(setComments(comments))
       }
     })
   }
 
-  public addComment(nodeId, uId, uName, text) {
-    const nodeCommentsRef = ref(this.db, 'nodes/' + nodeId + '/comments/');
-    let date = new Date();
+  public addComment(text:string) {
+    const treeManager = TreeManager.getInstance()
+    const nodeId = treeManager.recentNodes[0]
+    const commentsRef = ref(this.db, 'nodes/' + nodeId + '/comments/')
     const comment = {
-      date: date.getTime().toString(),
-      uId: uId,
-      uName: uName,
-      text: text
+      date: Date.now(),
+      uId: store.getState().profileReducer.userId,
+      uName: store.getState().profileReducer.userName,
+      text
     }
-    push(nodeCommentsRef, comment)
-    .then(() => {
-    })
-    .catch((err) => {
-      console.log(err);
-    })
+    push(commentsRef, comment)
+      .then((res) => {
+        // chilling
+      }).catch((err) => {
+        console.log(err)
+      })
   }
 }

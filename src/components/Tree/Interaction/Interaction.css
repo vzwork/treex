@@ -1,4 +1,5 @@
 .interaction {
+    overflow: hidden;
     background: white;
     height: 100%;
 }

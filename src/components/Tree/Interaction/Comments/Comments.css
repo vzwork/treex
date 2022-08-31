@@ -1,0 +1,42 @@
+.comments {
+  background: mediumaquamarine;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.commentsOutput {
+  overflow-x: auto;
+  padding: 5px;
+}
+
+.commentsInput {
+  display: flex;
+  margin: 5px;
+  padding: 5px;
+  border-radius: 5px;
+  background: #ddd;
+}
+
+.commentsInput input {
+  border: solid 1px white;
+  margin: 1px;
+  font-size: 1rem;
+  width: calc(100% - 50px)
+}
+
+.commentsInput .sendComment {
+  border: solid 1px white;
+  margin: 1px;
+  padding: 5px;
+  background-color: mediumaquamarine;
+  cursor: pointer;
+}
+
+.comments .sendComment:hover {
+  border: solid 1px black;
+}
