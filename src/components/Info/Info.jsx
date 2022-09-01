@@ -5,10 +5,19 @@ function Info () {
   return (
     <div className='info'>
       <div className='explanation'>
-        You will have limited number of node loads as a guest. <br/>
-        But if you register you can have as many as you want. <br/>
-        In tree navigation is at the bottom. <br/>
-        And I hope ui is simple to understand. <br/>
+        1. Please register
+      </div>
+      <div className='explanation'>
+        2. Treex is an app for sharing ideas and collaboration
+      </div>
+      <div className='explanation'>
+        3. You can navigate to the topics, create and destroy them
+      </div>
+      <div className='explanation'>
+        4. And you can discuss topics and store information in the permanent window
+      </div>
+      <div className='explanation'>
+        5. Have fun!!!
       </div>
     </div>
   );

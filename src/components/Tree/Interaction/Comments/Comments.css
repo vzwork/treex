@@ -1,5 +1,5 @@
 .comments {
-  background: mediumaquamarine;
+  background: rgb(178, 230, 183);
   height: 100%;
   width: 100%;
   position: absolute;
@@ -33,7 +33,7 @@
   border: solid 1px white;
   margin: 1px;
   padding: 5px;
-  background-color: mediumaquamarine;
+  background: rgb(178, 230, 183);
   cursor: pointer;
 }
 

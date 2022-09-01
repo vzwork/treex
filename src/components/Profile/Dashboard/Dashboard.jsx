@@ -60,7 +60,7 @@ function Dashboard() {
         <div className='name'>
           {firstName + ' ' + lastName}
           {currentId == userId
-            ? <button className='editDashboardButton' onClick={showEditDashboard}>edit</button>
+            ? <div className='editDashboardButton' onClick={showEditDashboard}>edit</div>
             : null
           }
         </div>

@@ -1,9 +1,11 @@
 import app from './firebaseApp';
 import { FirebaseApp } from 'firebase/app';
-import { Database, getDatabase, onValue, push, ref, remove, set } from 'firebase/database';
+import { Database, get, getDatabase, onValue, push, ref, remove, set } from 'firebase/database';
 import store from '../store'
 import { setComments } from '../store/actions';
 import { TreeManager } from './TreeManager';
+
+const commentsSizeLimit = 30;
 
 export class CommentsManager {
   // vvv fields vvv
@@ -39,16 +41,24 @@ export class CommentsManager {
     ]
     onValue(commentsRef, (snapshot) => {
       if (!snapshot.exists()) {
-        set(commentsRef, [
-          {
+        set(commentsRef, 
+          [{
             date: Date.now(),
             uId: 'NqT5XjbHvFVDobcNW9KVhd4Zsgz1',
             uName: 'admin',
             text: greetingValues[(Math.floor(Math.random() * greetingValues.length))]
-          }
-        ])
+          }]
+        )
       } else {
         let comments:any[] = []
+        if (snapshot.size > commentsSizeLimit) {
+          let out:any[] = []
+          snapshot.forEach((comment) => {
+            out.push(comment.val())
+          })
+          out = out.slice(-commentsSizeLimit)
+          set(commentsRef, out)
+        }
         snapshot.forEach((comment) => {
           const data = comment.val()
           comments.push(data)

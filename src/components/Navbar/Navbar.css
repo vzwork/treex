@@ -25,6 +25,6 @@
 }
 
 .navbar a:hover {
-  color: green;
+  background: rgb(178, 230, 183);
   border: 1px green solid;
 }

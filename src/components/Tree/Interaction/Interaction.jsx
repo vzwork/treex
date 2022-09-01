@@ -13,7 +13,7 @@ const Interaction = () => {
     
     return (
         <div className='interaction'>
-            {/* <InteractionBar /> */}
+            <InteractionBar />
             <ReflexContainer orientation='horizontal'>
                 <ReflexElement size={300} minSize={60}>
                     <File />
