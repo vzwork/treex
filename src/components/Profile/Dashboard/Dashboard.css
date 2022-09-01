@@ -5,14 +5,29 @@
 }
 
 .name {
+  padding: 0.5rem;
   display: flex;
   justify-content: space-between;
-  background: green;
+  background: #bbb;
   font-size: 1.6rem;
 }
 
+.editDashboardButton {
+  cursor: pointer;
+  background: rgb(178, 230, 183);
+  font-size: 0.8rem;
+  padding: 8px;
+  border-radius: 5px;
+  border: solid 1px white;
+}
+
+.editDashboardButton:hover {
+  border: solid 1px black;
+}
+
 .userName {
-  background: red;
+  padding: 0.5rem;
+  background: #ddd;
 }
 
 .userStatus {
@@ -25,9 +40,15 @@
 }
 
 .userStatusButton {
+  cursor: pointer;
   background: #aaa;
   width: max-content;
   margin: 0.1rem;
   padding: 0.3rem;
   border-radius: 5px;
+  border: solid 1px white;
+}
+
+.userStatusButton:hover {
+  border: solid 1px black;
 }

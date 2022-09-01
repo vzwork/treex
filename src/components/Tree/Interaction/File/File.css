@@ -2,10 +2,10 @@
   position: absolute;
   height: 100%;
   width: 100%;
-  background: green;
 }
 
 .fileTextInput {
+  background: rgb(221, 241, 223);
   font-size: 1rem;
   padding: 5px;
   font-family: 'Comfortaa';
@@ -16,11 +16,11 @@
 
 .fileSaveButton {
   cursor: pointer;
-  background-color: orange;
-  width: calc(100% - 2px);
+  background: #ddd;
+  width: calc(100% - 4px);
   height: 20px;
   text-align: center;
   padding: 1px 0;
-  border: 1px white;
+  border: solid 1px #ddd;
   margin: 1px 1px;
 }

@@ -1,12 +1,17 @@
 .info {
+  background: rgb(198, 228, 201);
+  display: flex;
+  flex-direction: column;
   width: 100vw;
-  height: 70vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .explanation {
+  margin: 1rem;
+  width: 80%;
   background: #ccc;
   padding: 1rem;
   border-radius: 0.5rem;

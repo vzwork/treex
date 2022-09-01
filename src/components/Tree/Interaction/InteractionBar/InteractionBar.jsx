@@ -4,7 +4,7 @@ import React from 'react'
 const InteractionBar = () => {
   return (
     <div className='interactionBar'>
-      interaction bar
+       The permanent information for this node:
     </div>
   )
 }
