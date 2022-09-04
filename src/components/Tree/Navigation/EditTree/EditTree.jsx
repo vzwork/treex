@@ -13,9 +13,9 @@ const EditTree = (props) => {
       <div className='editTree-button' onClick={()=>{props.setDeleteNode(true)}}>
         <TiDeleteOutline />
       </div>
-      <div className='editTree-button' onClick={()=>{props.setSearch(true)}}>
+      {/* <div className='editTree-button' onClick={()=>{props.setSearch(true)}}>
         <HiOutlineSearchCircle />
-      </div>
+      </div> */}
     </div>
   )
 }
