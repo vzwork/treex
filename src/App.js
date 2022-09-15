@@ -40,7 +40,7 @@ class App extends Component {
                 <Navbar />
                 <Routes>
                   <Route path='/' element={<Info />} />
-                  <Route path='/tree' element={<Tree />} />
+                  <Route path='/tree/:id' element={<Tree />} />
                   <Route path='/profile' element={<Profile />} />
                 </Routes>
               </HashRouter>

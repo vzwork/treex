@@ -3,11 +3,11 @@ import React from 'react';
 import Node from './Node/Node';
 
 const Shelf = (props) => {
-  const ids = props.ids;
+  const nodeRefs = props.nodeRefs;
   return (
     <div className='shelf'>
-      {ids.map((item, index)=>{
-          return <Node id={item} key={index} />
+      {nodeRefs.map((item, index)=>{
+          return <Node nodeRef={item} key={index} />
       })}
     </div>
   );

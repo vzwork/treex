@@ -1,12 +1,13 @@
 // + getInstance()
 //
-// + addObserver(callback: () => void)
-// + removeObserver(callback: () => void)
-// - notifyObservers()
+// + attach()
+// + detach()
+// - notify()
 //
 // + setBaseId(id: string = DEFAULT_NODE_ID)
 // + getBaseId(): string
 //
+// + hasNode(id: string): Boolean
 // + getNode(id: string): Node
 // + updateNodeWeb(node: Node)
 // + updateNode(node: Node)
@@ -15,25 +16,29 @@
 // - watchNode(id: string)
 // - stopWatchingNode(id: string)
 
+import { Subject } from '../Observer/Observer'
+import { Observer } from '../Observer/Observer'
+
 import { Node } from '../data/Node'
 import { TreeComFirebase } from './TreeComFirebase'
 
-const DEFAULT_NODE_ID = 'KSLC3E9YXXNJNKx23LqV'
-
-export class TreeManager {
+export class TreeManager implements Subject {
   // vvv fields vvv
-  observers: Set<(()=>void)>
+  observers: Set<Observer>
   nodes: Map<string, Node>
+  badIds: Set<String>
+  recentNodes: string[]
   baseId: string
-  firebaseCom: TreeComFirebase
+  treeComFirebase: TreeComFirebase
   // ^^^ fields ^^^
 
   // vvv Singleton vvv
   private constructor() {
     this.observers = new Set()
     this.nodes = new Map()
-    this.baseId = DEFAULT_NODE_ID
-    this.firebaseCom = TreeComFirebase.getInstance(this)
+    this.badIds = new Set()
+    this.recentNodes = []
+    this.treeComFirebase = TreeComFirebase.getInstance(this)
   }
   private static instance: TreeManager
   public static getInstance(): TreeManager {
@@ -45,47 +50,77 @@ export class TreeManager {
   // ^^^ Singleton ^^^
 
   // vvv public methods vvv
-  public addObserver(callback: (()=>void)) { this.observers.add(callback) }
-  public removeObserver(callback: (()=>void)) { this.observers.delete(callback) }
-  public notifyObservers () {
-    this.observers.forEach((observer)=>{
-      observer()
+  public attach(observer: Observer) { this.observers.add(observer) }
+  public detach(observer: Observer) { this.observers.delete(observer) }
+  public notify() {
+    console.log(this.nodes.size)
+    this.observers.forEach((observer) => {
+      observer.update(this)
     })
   }
 
-  public setBaseId(id: string) { 
-    this.baseId = id 
-    this.notifyObservers()
+  public setBaseId(id: string) {
+    if (this.badIds.has(id)) {
+      console.log('bruburuburuu')
+      return
+    }
+    this.baseId = id
+    this.treeComFirebase.watchNode(id)
+    this.notify()
   }
   public getBaseId() { return this.baseId }
-
+  public hasNode(id: string) {
+    return this.nodes.has(id)
+  }
   public getNode(id: string) {
+    if (!this.hasNode(id)) { 
+      this.recentNodes.unshift(id)
+      if (this.nodes.size >= 10) {
+        let lastId = this.recentNodes.pop()
+        if (!lastId) { return }
+        while(!this.nodes.has(lastId)) {
+          lastId = this.recentNodes.pop()
+          if (!lastId) { return }
+        }
+        this.stopWatchingNode(lastId)
+      }
+    }
+    if (this.badIds.has(id)) {
+      return
+    }
     const local = this.nodes.get(id)
-    if (!local) { this.watchNode(id) }
+    if (!local) { this.watchNode(id); return }
     return local
   }
+
   public updateNodeWeb(node: Node) {
-    this.firebaseCom.updateNode(node)
+    this.treeComFirebase.updateNode(node)
+    this.updateNode(node)
   }
   public updateNode(node: Node) {
     this.nodes.set(node.selfReference.id, node)
-    this.notifyObservers()
+    this.notify()
   }
+
   public deleteNodeWeb(id: string) {
-    this.firebaseCom.deleteNode(id)
+    this.treeComFirebase.deleteNode(id)
+    this.deleteNode(id)
   }
   public deleteNode(id: string) {
+    this.badIds.add(id)
     this.nodes.delete(id)
-    this.notifyObservers()
+    this.stopWatchingNode(id)
+    this.notify()
   }
   // ^^^ public methods ^^^
 
   // vvv private methods vvv
   private watchNode(id: string) {
-    this.firebaseCom.watchNode(id)
+    this.treeComFirebase.watchNode(id)
   }
   private stopWatchingNode(id: string) {
-    this.firebaseCom.stopWatchingNode(id)
+    this.nodes.delete(id)
+    this.treeComFirebase.stopWatchingNode(id)
   } 
   // ^^^ private methods ^^^
 }

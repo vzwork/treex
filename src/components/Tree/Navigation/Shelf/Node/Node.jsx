@@ -4,27 +4,23 @@ import { TreeManager } from '../../../../../data/TreeManager';
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth } from 'firebase/auth';
 import app from '../../../../../data/firebaseApp';
-
-const treeManager = TreeManager.getInstance()
+import { useNavigate } from 'react-router-dom';
 
 const Node = (props) => {
+  const navigate = useNavigate()
   const auth = getAuth(app)
   const [user, loading, error] = useAuthState(auth);
   
-  const id = props.id;
+  const nodeRef = props.nodeRef;
 
-  async function select(){
-    const treeManager = TreeManager.getInstance();
-    if (!user) {
-      // TODO: prevent spam
-    }
-    treeManager.setBase(id);
+  function select(){
+    navigate(`/tree/${nodeRef.id}`)
   }
 
   return (
-    <button className={'node ' + (treeManager.recentNodes[0] == id ? 'base' : '')}
+    <button className={'node '}
       onClick={select}>
-      {treeManager.getName(id)}
+      {nodeRef.name}
     </button>
   );
 }
